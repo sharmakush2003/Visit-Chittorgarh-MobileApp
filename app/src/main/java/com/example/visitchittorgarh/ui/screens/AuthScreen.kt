@@ -3,6 +3,7 @@ package com.example.visitchittorgarh.ui.screens
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -27,6 +28,7 @@ import com.example.visitchittorgarh.R
 import com.example.visitchittorgarh.theme.CrimsonDark
 import com.example.visitchittorgarh.theme.CrimsonSecondary
 import com.example.visitchittorgarh.theme.SaffronPrimary
+import com.example.visitchittorgarh.theme.SlateSurfaceDark
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
@@ -134,122 +136,138 @@ fun AuthScreen(
                 )
         )
 
-        Column(
+        // Responsive Scrollable Container
+        Box(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            contentAlignment = Alignment.Center
         ) {
-            // Gold Logo
-            GoldFortLogo(
+            Column(
                 modifier = Modifier
-                    .size(80.dp)
-                    .padding(bottom = 8.dp)
-            )
-
-            Text(
-                text = if (isEnglish) "Chittorgarh Tourism" else "चित्तौड़गढ़ पर्यटन",
-                color = SaffronPrimary,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif,
-                letterSpacing = 1.sp
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Main Auth Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    .widthIn(max = 460.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                // Gold Logo
+                GoldFortLogo(
+                    modifier = Modifier
+                        .size(90.dp)
+                        .padding(bottom = 12.dp)
+                )
+
+                Text(
+                    text = if (isEnglish) "Chittorgarh Tourism" else "चित्तौड़गढ़ पर्यटन",
+                    color = SaffronPrimary,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Serif,
+                    letterSpacing = 1.sp,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                // Main Auth Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(containerColor = SlateSurfaceDark.copy(alpha = 0.95f)),
+                    border = BorderStroke(1.5.dp, SaffronPrimary.copy(alpha = 0.8f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
                 ) {
-                    Text(
-                        text = if (isEnglish) "Welcome" else "स्वागत है",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Serif,
-                        color = CrimsonSecondary
-                    )
+                    Column(
+                        modifier = Modifier.padding(28.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = if (isEnglish) "Welcome to Chittorgarh" else "चित्तौड़गढ़ में आपका स्वागत है",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Serif,
+                            color = SaffronPrimary,
+                            textAlign = TextAlign.Center
+                        )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        text = if (isEnglish) {
-                            "Sign in with Google to explore historical monuments, book royal travel passes, and guide services."
-                        } else {
-                            "ऐतिहासिक स्मारकों को देखने, शाही यात्रा पास और गाइड सेवाएं बुक करने के लिए गूगल से लॉगिन करें।"
-                        },
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 20.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(28.dp))
-
-                    if (isLoading) {
-                        CircularProgressIndicator(color = SaffronPrimary)
-                    } else {
-                        // Google Sign-In Button
-                        Button(
-                            onClick = {
-                                isLoading = true
-                                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                    .requestIdToken(context.getString(R.string.default_web_client_id))
-                                    .requestEmail()
-                                    .build()
-                                val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                                googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                        Text(
+                            text = if (isEnglish) {
+                                "Explore the land of historic forts, legendary stories of bravery, and rich heritage. Sign in to start your royal journey."
+                            } else {
+                                "ऐतिहासिक किलों, वीरता की गौरवशाली कहानियों और समृद्ध विरासत की भूमि का अन्वेषण करें। अपनी शाही यात्रा शुरू करने के लिए लॉगिन करें।"
                             },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = CrimsonSecondary)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
+                            fontSize = 14.sp,
+                            color = Color.White.copy(alpha = 0.8f),
+                            textAlign = TextAlign.Center,
+                            lineHeight = 22.sp,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        if (isLoading) {
+                            CircularProgressIndicator(color = SaffronPrimary)
+                        } else {
+                            // Premium White Google Sign-In Button
+                            Button(
+                                onClick = {
+                                    isLoading = true
+                                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                        .requestIdToken(context.getString(R.string.default_web_client_id))
+                                        .requestEmail()
+                                        .build()
+                                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                                    googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(54.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                border = BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.6f)),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.White,
+                                    contentColor = Color.Black
+                                ),
+                                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                             ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.ic_google),
-                                    contentDescription = "Google Logo",
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Text(
-                                    text = if (isEnglish) "Continue with Google" else "गूगल के साथ जारी रखें",
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Serif,
-                                    fontSize = 15.sp,
-                                    color = Color.White
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.ic_google),
+                                        contentDescription = "Google Logo",
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = if (isEnglish) "Continue with Google" else "गूगल के साथ जारी रखें",
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.Serif,
+                                        fontSize = 16.sp,
+                                        color = Color.Black
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(28.dp))
 
-            // Back/Skip Text Button
-            TextButton(onClick = onBackClick) {
-                Text(
-                    text = if (isEnglish) "Back to Home" else "मुख्य पृष्ठ पर वापस जाएँ",
-                    color = Color.White.copy(alpha = 0.7f),
-                    fontSize = 14.sp
-                )
+                // Back/Skip Text Button
+                TextButton(onClick = onBackClick) {
+                    Text(
+                        text = if (isEnglish) "Back to Home" else "मुख्य पृष्ठ पर वापस जाएँ",
+                        color = Color.White.copy(alpha = 0.8f),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
     }

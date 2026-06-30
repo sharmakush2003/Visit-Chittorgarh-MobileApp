@@ -379,18 +379,18 @@ fun WeatherScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBackClick) {
                 Icon(Icons.Default.ArrowBack, null, tint = Color.White)
             }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(modifier = Modifier.width(6.dp))
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     "📍 Chittorgarh, Rajasthan",
                     color = Color.White, fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp, fontFamily = FontFamily.Serif
+                    fontSize = 16.sp, fontFamily = FontFamily.Serif
                 )
                 weather?.fetchTime?.let {
                     Text("Updated $it", color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp)
@@ -692,10 +692,6 @@ private fun HourlyCard(item: HourlyItem) {
         Text(wmoToEmoji(item.weatherCode), fontSize = 20.sp)
         Spacer(Modifier.height(4.dp))
         Text("${item.temp.toInt()}°", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-        if (item.precipProb > 0) {
-            Spacer(Modifier.height(2.dp))
-            Text("💧${item.precipProb}%", color = Color(0xFF64B5F6), fontSize = 9.sp)
-        }
     }
 }
 

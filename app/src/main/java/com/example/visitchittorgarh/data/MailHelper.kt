@@ -18,7 +18,7 @@ object MailHelper {
     private const val SENDER_EMAIL = "visitchittorgarh@gmail.com"
     
     // Default placeholder app password. The user will generate one and replace it.
-    private const val APP_PASSWORD = "YOUR_GMAIL_APP_PASSWORD"
+    private const val APP_PASSWORD = "hsmu cxpt rsmc qkts"
 
     suspend fun sendWelcomeEmail(recipientEmail: String, displayName: String): Boolean = withContext(Dispatchers.IO) {
         try {

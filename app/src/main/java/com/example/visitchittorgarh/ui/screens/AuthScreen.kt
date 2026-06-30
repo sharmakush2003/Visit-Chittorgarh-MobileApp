@@ -34,6 +34,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
+import com.example.visitchittorgarh.data.MailHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +46,7 @@ fun AuthScreen(
 ) {
     val context = LocalContext.current
     val auth = remember { FirebaseAuth.getInstance() }
+    val coroutineScope = rememberCoroutineScope()
 
     var isLoading by remember { mutableStateOf(false) }
     var dialogTitle by remember { mutableStateOf("") }
@@ -67,24 +70,11 @@ fun AuthScreen(
                         val displayName = user?.displayName ?: ""
 
                         if (isNewUser) {
-                            // Send welcome email via Firestore
+                            // Send welcome email directly via SMTP MailHelper
                             if (userEmail.isNotEmpty()) {
-                                val db = FirebaseFirestore.getInstance()
-                                val mailData = hashMapOf(
-                                    "to" to listOf(userEmail),
-                                    "message" to hashMapOf(
-                                        "subject" to "Welcome to Visit Chittorgarh!",
-                                        "text" to """
-                                            Hello ${if (displayName.isNotEmpty()) displayName else "Traveler"},
-
-                                            Welcome to the Visit Chittorgarh app! We are excited to have you on board. Discover the rich history of Chittorgarh, book royal travel passes, hotel stays, and professional guides all in one place.
-
-                                            Best Regards,
-                                            Visit Chittorgarh Team
-                                        """.trimIndent()
-                                    )
-                                )
-                                db.collection("mail").add(mailData)
+                                coroutineScope.launch {
+                                    MailHelper.sendWelcomeEmail(userEmail, displayName)
+                                }
                             }
 
                             dialogTitle = if (isEnglish) "Registration Successful!" else "पंजीकरण सफल रहा!"

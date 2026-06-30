@@ -127,4 +127,8 @@ dependencies {
   implementation(libs.firebase.firestore)
   implementation(libs.firebase.analytics)
   implementation(libs.play.services.auth)
+
+  // JavaMail API for SMTP
+  implementation("com.sun.mail:android-mail:1.6.7")
+  implementation("com.sun.mail:android-activation:1.6.7")
 }

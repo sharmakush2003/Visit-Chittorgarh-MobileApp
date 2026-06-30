@@ -1,6 +1,7 @@
 package com.example.visitchittorgarh.ui.screens
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -10,8 +11,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,14 +18,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.visitchittorgarh.theme.CrimsonSecondary
 import com.example.visitchittorgarh.theme.GoldAccent
 import com.example.visitchittorgarh.theme.SaffronPrimary
 import kotlinx.coroutines.Dispatchers
@@ -36,193 +36,294 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 
-// ─── Data Models ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════
+// DATA MODELS
+// ═══════════════════════════════════════════════════════════════════════
 
-data class CurrentWeather(
-    val tempC: Int,
-    val feelsLikeC: Int,
+data class WeatherData(
+    val currentTemp: Double,
+    val feelsLike: Double,
     val humidity: Int,
-    val windKmph: Int,
-    val uvIndex: Int,
-    val visibility: Int,
-    val pressure: Int,
-    val description: String,
-    val emoji: String,
+    val windSpeed: Double,
+    val windDirection: Int,
+    val uvIndex: Double,
+    val visibility: Double,
+    val pressure: Double,
+    val precipitation: Double,
+    val cloudCover: Int,
+    val weatherCode: Int,
+    val sunrise: String,
+    val sunset: String,
+    val hourly: List<HourlyItem>,
+    val daily: List<DailyItem>,
+    val fetchTime: String
+)
+
+data class HourlyItem(
+    val time: String,
+    val hour: String,
+    val temp: Double,
+    val weatherCode: Int,
+    val precipProb: Int
+)
+
+data class DailyItem(
+    val dayLabel: String,
+    val date: String,
+    val maxTemp: Double,
+    val minTemp: Double,
+    val weatherCode: Int,
+    val precipSum: Double,
+    val uvMax: Double,
+    val windMax: Double,
     val sunrise: String,
     val sunset: String
 )
 
-data class DayForecast(
-    val date: String,
-    val dayLabel: String,
-    val maxC: Int,
-    val minC: Int,
-    val description: String,
-    val emoji: String,
-    val avgHumidity: Int
-)
+// ═══════════════════════════════════════════════════════════════════════
+// WMO WEATHER CODE INTERPRETATION
+// ═══════════════════════════════════════════════════════════════════════
 
-// ─── Helper: map weather description to emoji ─────────────────────────────────
+fun wmoToEmoji(code: Int): String = when (code) {
+    0            -> "☀️"
+    1            -> "🌤️"
+    2            -> "⛅"
+    3            -> "☁️"
+    45, 48       -> "🌫️"
+    51, 53, 55   -> "🌦️"
+    56, 57       -> "🌧️"
+    61, 63       -> "🌧️"
+    65           -> "🌊"
+    71, 73       -> "🌨️"
+    75, 77       -> "❄️"
+    80, 81, 82   -> "🌦️"
+    85, 86       -> "🌨️"
+    95           -> "⛈️"
+    96, 99       -> "⛈️"
+    else         -> "🌡️"
+}
 
-fun weatherEmoji(desc: String): String {
-    val d = desc.lowercase()
+fun wmoToDescEn(code: Int): String = when (code) {
+    0            -> "Clear Sky"
+    1            -> "Mainly Clear"
+    2            -> "Partly Cloudy"
+    3            -> "Overcast"
+    45           -> "Foggy"
+    48           -> "Icy Fog"
+    51           -> "Light Drizzle"
+    53           -> "Moderate Drizzle"
+    55           -> "Dense Drizzle"
+    61           -> "Slight Rain"
+    63           -> "Moderate Rain"
+    65           -> "Heavy Rain"
+    71           -> "Slight Snowfall"
+    73           -> "Moderate Snowfall"
+    75           -> "Heavy Snowfall"
+    80           -> "Slight Showers"
+    81           -> "Moderate Showers"
+    82           -> "Violent Showers"
+    95           -> "Thunderstorm"
+    96, 99       -> "Thunderstorm with Hail"
+    else         -> "Unknown"
+}
+
+fun wmoToDescHi(code: Int): String = when (code) {
+    0            -> "साफ आसमान"
+    1            -> "मुख्यतः साफ"
+    2            -> "आंशिक बादल"
+    3            -> "पूरी तरह बादल"
+    45           -> "कोहरा"
+    48           -> "बर्फीला कोहरा"
+    51           -> "हल्की बूंदाबांदी"
+    53           -> "मध्यम बूंदाबांदी"
+    55           -> "घनी बूंदाबांदी"
+    61           -> "हल्की बारिश"
+    63           -> "मध्यम बारिश"
+    65           -> "भारी बारिश"
+    71           -> "हल्की बर्फ"
+    73           -> "मध्यम बर्फ"
+    75           -> "भारी बर्फ"
+    80           -> "हल्की फुहार"
+    81           -> "मध्यम फुहार"
+    82           -> "तेज फुहार"
+    95           -> "आंधी तूफान"
+    96, 99       -> "ओलों के साथ तूफान"
+    else         -> "अज्ञात"
+}
+
+// Dynamic sky gradient based on time and weather
+fun skyGradient(code: Int, hourOfDay: Int): List<Color> {
+    val isNight = hourOfDay < 6 || hourOfDay >= 19
+    val isDusk = hourOfDay in 17..18
+    val isDawn = hourOfDay in 5..7
     return when {
-        "thunder" in d || "storm" in d  -> "⛈️"
-        "rain" in d || "drizzle" in d   -> "🌧️"
-        "snow" in d || "sleet" in d     -> "❄️"
-        "fog" in d || "mist" in d       -> "🌫️"
-        "overcast" in d                  -> "☁️"
-        "cloudy" in d                    -> "⛅"
-        "partly" in d                    -> "🌤️"
-        "sunny" in d || "clear" in d    -> "☀️"
-        "haze" in d || "smoke" in d     -> "🌁"
-        "blizzard" in d                  -> "🌨️"
-        else                             -> "🌡️"
+        code >= 95 -> listOf(Color(0xFF0D0D1A), Color(0xFF1A1030), Color(0xFF2C1654))
+        code in 45..82 && isNight -> listOf(Color(0xFF0F1923), Color(0xFF1A2A3A))
+        code in 45..82 -> listOf(Color(0xFF2C3E50), Color(0xFF3D5265), Color(0xFF4A6680))
+        isNight -> listOf(Color(0xFF050A1A), Color(0xFF0D1B4A), Color(0xFF162461))
+        isDusk -> listOf(Color(0xFF1A0A2E), Color(0xFF8B3A62), Color(0xFFE8824A), Color(0xFFF5C843))
+        isDawn -> listOf(Color(0xFF0D1B4A), Color(0xFF7B4FA6), Color(0xFFE8824A), Color(0xFFFFF176))
+        else -> listOf(Color(0xFF1565C0), Color(0xFF1976D2), Color(0xFF42A5F5), Color(0xFF81D4FA))
     }
 }
 
-// ─── API Fetch ────────────────────────────────────────────────────────────────
+fun uvLabel(uv: Double, en: Boolean): String = when {
+    uv <= 2  -> if (en) "Low" else "कम"
+    uv <= 5  -> if (en) "Moderate" else "मध्यम"
+    uv <= 7  -> if (en) "High" else "अधिक"
+    uv <= 10 -> if (en) "Very High" else "बहुत अधिक"
+    else     -> if (en) "Extreme" else "अत्यधिक"
+}
 
-suspend fun fetchChittorgarhWeather(): Pair<CurrentWeather, List<DayForecast>>? {
-    return withContext(Dispatchers.IO) {
-        try {
-            val json = URL("https://wttr.in/Chittorgarh?format=j1").readText(Charsets.UTF_8)
-            val root = JSONObject(json)
+fun uvColor(uv: Double): Color = when {
+    uv <= 2  -> Color(0xFF4CAF50)
+    uv <= 5  -> Color(0xFFFFEB3B)
+    uv <= 7  -> Color(0xFFFF9800)
+    uv <= 10 -> Color(0xFFE53935)
+    else     -> Color(0xFF9C27B0)
+}
 
-            val current = root.getJSONArray("current_condition").getJSONObject(0)
-            val tempC = current.getString("temp_C").toIntOrNull() ?: 0
-            val feelsLikeC = current.getString("FeelsLikeC").toIntOrNull() ?: 0
-            val humidity = current.getString("humidity").toIntOrNull() ?: 0
-            val windKmph = current.getString("windspeedKmph").toIntOrNull() ?: 0
-            val uvIndex = current.getString("uvIndex").toIntOrNull() ?: 0
-            val visibility = current.getString("visibility").toIntOrNull() ?: 0
-            val pressure = current.getString("pressure").toIntOrNull() ?: 0
-            val description = current.getJSONArray("weatherDesc")
-                .getJSONObject(0).getString("value")
+fun windDirLabel(deg: Int): String {
+    val dirs = listOf("N","NE","E","SE","S","SW","W","NW")
+    return dirs[((deg + 22.5) / 45).toInt() % 8]
+}
 
-            val weatherArr = root.getJSONArray("weather")
-            val todayAstro = weatherArr.getJSONObject(0)
-                .getJSONArray("astronomy").getJSONObject(0)
-            val sunrise = todayAstro.getString("sunrise")
-            val sunset = todayAstro.getString("sunset")
+// ═══════════════════════════════════════════════════════════════════════
+// OPEN-METEO API FETCH  (free, no key, ECMWF powered)
+// ═══════════════════════════════════════════════════════════════════════
 
-            val cw = CurrentWeather(
-                tempC = tempC,
-                feelsLikeC = feelsLikeC,
-                humidity = humidity,
-                windKmph = windKmph,
-                uvIndex = uvIndex,
-                visibility = visibility,
-                pressure = pressure,
-                description = description,
-                emoji = weatherEmoji(description),
-                sunrise = sunrise,
-                sunset = sunset
-            )
+suspend fun fetchOpenMeteoWeather(): WeatherData? = withContext(Dispatchers.IO) {
+    try {
+        val url = "https://api.open-meteo.com/v1/forecast?" +
+            "latitude=24.8887&longitude=74.6269" +
+            "&current=temperature_2m,relative_humidity_2m,apparent_temperature," +
+            "precipitation,weather_code,cloud_cover,wind_speed_10m," +
+            "wind_direction_10m,uv_index,visibility,surface_pressure" +
+            "&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,weather_code" +
+            "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum," +
+            "sunrise,sunset,uv_index_max,wind_speed_10m_max" +
+            "&timezone=Asia%2FKolkata&forecast_days=7"
 
-            // 3-day forecast
-            val dayNames = listOf("Today", "Tomorrow", "Day 3")
-            val forecasts = (0 until minOf(3, weatherArr.length())).map { i ->
-                val day = weatherArr.getJSONObject(i)
-                val dateStr = day.getString("date")
-                val maxC = day.getString("maxtempC").toIntOrNull() ?: 0
-                val minC = day.getString("mintempC").toIntOrNull() ?: 0
+        val raw = URL(url).readText(Charsets.UTF_8)
+        val json = JSONObject(raw)
 
-                // Average humidity from hourly
-                val hourly = day.getJSONArray("hourly")
-                var humSum = 0
-                var humCnt = 0
-                var dayDesc = description
-                for (h in 0 until hourly.length()) {
-                    val hr = hourly.getJSONObject(h)
-                    humSum += hr.getString("humidity").toIntOrNull() ?: 0
-                    humCnt++
-                    if (h == hourly.length() / 2) {
-                        dayDesc = hr.getJSONArray("weatherDesc")
-                            .getJSONObject(0).getString("value")
-                    }
-                }
-                val avgHum = if (humCnt > 0) humSum / humCnt else 0
+        val cur = json.getJSONObject("current")
+        val currentCode = cur.getInt("weather_code")
 
-                // Format date label
-                val cal = Calendar.getInstance()
-                val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-                val parsedDate = try { fmt.parse(dateStr) } catch (e: Exception) { null }
-                val dayLabel = when (i) {
-                    0 -> "Today"
-                    1 -> "Tomorrow"
+        // Parse hourly (next 24 hours from now)
+        val hourlyJson = json.getJSONObject("hourly")
+        val hourlyTimes = hourlyJson.getJSONArray("time")
+        val hourlyTemps = hourlyJson.getJSONArray("temperature_2m")
+        val hourlyPrecip = hourlyJson.getJSONArray("precipitation_probability")
+        val hourlyCodes = hourlyJson.getJSONArray("weather_code")
+
+        val nowCal = Calendar.getInstance()
+        val nowHour = nowCal.get(Calendar.HOUR_OF_DAY)
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US)
+        val hourlyItems = mutableListOf<HourlyItem>()
+        for (i in 0 until minOf(48, hourlyTimes.length())) {
+            val timeStr = hourlyTimes.getString(i)
+            val parsed = try { sdf.parse(timeStr) } catch (e: Exception) { null }
+            if (parsed != null) {
+                val cal = Calendar.getInstance().apply { time = parsed }
+                val h = cal.get(Calendar.HOUR_OF_DAY)
+                val label = when {
+                    h == nowHour && i < 24 -> if (nowHour == 0) "12 AM" else if (nowHour < 12) "${nowHour} AM" else if (nowHour == 12) "12 PM" else "${nowHour - 12} PM"
                     else -> {
-                        parsedDate?.let {
-                            SimpleDateFormat("EEE, dd MMM", Locale.US).format(it)
-                        } ?: dayNames[i]
+                        when (h) {
+                            0 -> "12 AM"; 12 -> "12 PM"
+                            in 1..11 -> "$h AM"
+                            else -> "${h - 12} PM"
+                        }
                     }
                 }
-
-                DayForecast(
-                    date = dateStr,
-                    dayLabel = dayLabel,
-                    maxC = maxC,
-                    minC = minC,
-                    description = dayDesc,
-                    emoji = weatherEmoji(dayDesc),
-                    avgHumidity = avgHum
+                hourlyItems.add(
+                    HourlyItem(
+                        time = timeStr,
+                        hour = label,
+                        temp = hourlyTemps.getDouble(i),
+                        weatherCode = hourlyCodes.getInt(i),
+                        precipProb = hourlyPrecip.optInt(i, 0)
+                    )
                 )
+                if (hourlyItems.size >= 24) break
             }
-
-            Pair(cw, forecasts)
-        } catch (e: Exception) {
-            null
         }
+
+        // Parse daily
+        val dailyJson = json.getJSONObject("daily")
+        val dailyDates = dailyJson.getJSONArray("time")
+        val dailyMaxT = dailyJson.getJSONArray("temperature_2m_max")
+        val dailyMinT = dailyJson.getJSONArray("temperature_2m_min")
+        val dailyCodes = dailyJson.getJSONArray("weather_code")
+        val dailyPrecip = dailyJson.getJSONArray("precipitation_sum")
+        val dailyUV = dailyJson.getJSONArray("uv_index_max")
+        val dailyWind = dailyJson.getJSONArray("wind_speed_10m_max")
+        val dailySunrise = dailyJson.getJSONArray("sunrise")
+        val dailySunset = dailyJson.getJSONArray("sunset")
+
+        val dailyFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+        val displayFmt = SimpleDateFormat("EEE, dd MMM", Locale.US)
+        val timeFmt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US)
+
+        val dailyItems = (0 until minOf(7, dailyDates.length())).map { i ->
+            val dateStr = dailyDates.getString(i)
+            val parsed = try { dailyFmt.parse(dateStr) } catch (e: Exception) { null }
+            val label = when (i) {
+                0 -> "Today"
+                1 -> "Tomorrow"
+                else -> parsed?.let { displayFmt.format(it) } ?: dateStr
+            }
+            val srTime = dailySunrise.getString(i).let { s ->
+                try { SimpleDateFormat("HH:mm", Locale.US).format(timeFmt.parse(s)!!) } catch (e: Exception) { "6:00" }
+            }
+            val ssTime = dailySunset.getString(i).let { s ->
+                try { SimpleDateFormat("HH:mm", Locale.US).format(timeFmt.parse(s)!!) } catch (e: Exception) { "19:00" }
+            }
+            DailyItem(
+                dayLabel = label, date = dateStr,
+                maxTemp = dailyMaxT.getDouble(i), minTemp = dailyMinT.getDouble(i),
+                weatherCode = dailyCodes.getInt(i), precipSum = dailyPrecip.getDouble(i),
+                uvMax = dailyUV.getDouble(i), windMax = dailyWind.getDouble(i),
+                sunrise = srTime, sunset = ssTime
+            )
+        }
+
+        // Sunrise/Sunset for today (display format)
+        val todaySrRaw = dailySunrise.getString(0)
+        val todaySsRaw = dailySunset.getString(0)
+        val displayTimeFmt = SimpleDateFormat("h:mm a", Locale.US)
+        val srDisplay = try { displayTimeFmt.format(timeFmt.parse(todaySrRaw)!!) } catch (e: Exception) { "6:15 AM" }
+        val ssDisplay = try { displayTimeFmt.format(timeFmt.parse(todaySsRaw)!!) } catch (e: Exception) { "7:20 PM" }
+
+        val fetchTime = SimpleDateFormat("h:mm a", Locale.US).format(Date())
+
+        WeatherData(
+            currentTemp = cur.getDouble("temperature_2m"),
+            feelsLike = cur.getDouble("apparent_temperature"),
+            humidity = cur.getInt("relative_humidity_2m"),
+            windSpeed = cur.getDouble("wind_speed_10m"),
+            windDirection = cur.getInt("wind_direction_10m"),
+            uvIndex = cur.optDouble("uv_index", 0.0),
+            visibility = cur.optDouble("visibility", 10000.0) / 1000.0,
+            pressure = cur.getDouble("surface_pressure"),
+            precipitation = cur.getDouble("precipitation"),
+            cloudCover = cur.getInt("cloud_cover"),
+            weatherCode = currentCode,
+            sunrise = srDisplay,
+            sunset = ssDisplay,
+            hourly = hourlyItems,
+            daily = dailyItems,
+            fetchTime = fetchTime
+        )
+    } catch (e: Exception) {
+        null
     }
 }
 
-// ─── Best time to visit data ──────────────────────────────────────────────────
-
-data class SeasonInfo(
-    val monthRange: String,
-    val titleEn: String,
-    val titleHi: String,
-    val descEn: String,
-    val descHi: String,
-    val emoji: String,
-    val color: Color,
-    val isIdeal: Boolean
-)
-
-val chittorgarhSeasons = listOf(
-    SeasonInfo(
-        "Oct – Mar",
-        "Best Season 🌟",
-        "सर्वश्रेष्ठ मौसम 🌟",
-        "Ideal weather 15–28°C. Cool days, clear skies — perfect for fort exploration and photography.",
-        "आदर्श मौसम 15–28°C। ठंडे दिन, साफ आसमान — किले की यात्रा और फोटोग्राफी के लिए एकदम सही।",
-        "🌿",
-        Color(0xFF2E7D32),
-        true
-    ),
-    SeasonInfo(
-        "Apr – Jun",
-        "Hot Summer",
-        "गर्म गर्मी",
-        "Very hot 38–45°C. Start visits early morning (6–9 AM) or late evening. Stay hydrated.",
-        "बहुत गर्म 38–45°C। सुबह जल्दी (6–9 बजे) या देर शाम यात्रा करें। पानी पीते रहें।",
-        "☀️",
-        Color(0xFFF57F17),
-        false
-    ),
-    SeasonInfo(
-        "Jul – Sep",
-        "Monsoon Season",
-        "मानसून का मौसम",
-        "Heavy rains, lush greenery 25–35°C. Fort looks magical but paths can be slippery.",
-        "भारी बारिश, हरी-भरी हरियाली 25–35°C। किला जादुई लगता है पर रास्ते फिसलन भरे हो सकते हैं।",
-        "🌧️",
-        Color(0xFF1565C0),
-        false
-    )
-)
-
-// ─── Main Composable ──────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════
+// MAIN WEATHER SCREEN
+// ═══════════════════════════════════════════════════════════════════════
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -230,515 +331,601 @@ fun WeatherScreen(
     isEnglish: Boolean,
     onBackClick: () -> Unit
 ) {
-    var weather by remember { mutableStateOf<CurrentWeather?>(null) }
-    var forecasts by remember { mutableStateOf<List<DayForecast>>(emptyList()) }
+    var weather by remember { mutableStateOf<WeatherData?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var hasError by remember { mutableStateOf(false) }
+    var refreshTrigger by remember { mutableStateOf(0) }
 
-    // Spin animation for refresh button
-    val infiniteTransition = rememberInfiniteTransition(label = "spin")
-    val spinAngle by infiniteTransition.animateFloat(
-        initialValue = 0f, targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween(1800, easing = LinearEasing)),
-        label = "refresh_spin"
-    )
+    val hourOfDay = remember { Calendar.getInstance().get(Calendar.HOUR_OF_DAY) }
 
-    // Determine gradient based on weather
-    val bgGradient = remember(weather) {
-        val d = weather?.description?.lowercase() ?: ""
-        when {
-            "thunder" in d || "storm" in d -> listOf(Color(0xFF1A0533), Color(0xFF2C1654))
-            "rain" in d || "drizzle" in d  -> listOf(Color(0xFF0D2137), Color(0xFF1B3A5C))
-            "overcast" in d || "cloudy" in d -> listOf(Color(0xFF1C1C2E), Color(0xFF2A2A3E))
-            "sunny" in d || "clear" in d   -> listOf(Color(0xFF0D1B4A), Color(0xFF1A2F6B))
-            else                            -> listOf(Color(0xFF0B1628), Color(0xFF162440))
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        isLoading = true
-        hasError = false
-        val result = fetchChittorgarhWeather()
-        if (result != null) {
-            weather = result.first
-            forecasts = result.second
-            hasError = false
-        } else {
-            hasError = true
-        }
+    LaunchedEffect(refreshTrigger) {
+        isLoading = true; hasError = false
+        val result = fetchOpenMeteoWeather()
+        weather = result
+        hasError = result == null
         isLoading = false
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = if (isEnglish) "Weather" else "मौसम",
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Serif,
-                            fontSize = 20.sp,
-                            color = Color.White
-                        )
-                        Text(
-                            text = "Chittorgarh, Rajasthan",
-                            fontSize = 11.sp,
-                            color = Color.White.copy(alpha = 0.7f)
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {
-                        // Re-trigger LaunchedEffect not possible directly; user can swipe back and reopen
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh",
-                            tint = if (isLoading) GoldAccent else Color.White.copy(alpha = 0.7f),
-                            modifier = if (isLoading) Modifier.rotate(spinAngle) else Modifier
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        },
-        containerColor = Color.Transparent
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Brush.verticalGradient(bgGradient))
-        ) {
-            when {
-                isLoading -> {
-                    // Loading State
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator(color = SaffronPrimary, modifier = Modifier.size(48.dp))
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = if (isEnglish) "Fetching live weather..." else "लाइव मौसम ला रहे हैं...",
-                                color = Color.White.copy(alpha = 0.8f),
-                                fontFamily = FontFamily.Serif,
-                                fontSize = 16.sp
-                            )
-                        }
-                    }
-                }
-
-                hasError -> {
-                    // Error / No internet State
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(32.dp)
-                        ) {
-                            Text("📡", fontSize = 48.sp)
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = if (isEnglish) "No Internet Connection" else "इंटरनेट कनेक्शन नहीं है",
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp,
-                                fontFamily = FontFamily.Serif,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = if (isEnglish) "Please check your connection and try again." else "कृपया अपना कनेक्शन जांचें और पुनः प्रयास करें।",
-                                color = Color.White.copy(alpha = 0.7f),
-                                fontSize = 14.sp,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                }
-
-                weather != null -> {
-                    val w = weather!!
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        contentPadding = PaddingValues(bottom = 40.dp)
-                    ) {
-                        // ── CURRENT WEATHER HERO ──────────────────────────
-                        item {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp, bottom = 24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                // Location pin
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                ) {
-                                    Icon(
-                                        Icons.Default.LocationOn,
-                                        null,
-                                        tint = GoldAccent,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "Chittorgarh Fort Area",
-                                        color = GoldAccent,
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                }
-
-                                // Big emoji
-                                Text(text = w.emoji, fontSize = 80.sp)
-
-                                Spacer(modifier = Modifier.height(4.dp))
-
-                                // Temperature
-                                Text(
-                                    text = "${w.tempC}°C",
-                                    color = Color.White,
-                                    fontSize = 72.sp,
-                                    fontWeight = FontWeight.Thin,
-                                    letterSpacing = (-2).sp
-                                )
-
-                                // Description
-                                Text(
-                                    text = w.description,
-                                    color = Color.White.copy(alpha = 0.85f),
-                                    fontSize = 18.sp,
-                                    fontFamily = FontFamily.Serif,
-                                    textAlign = TextAlign.Center
-                                )
-
-                                Spacer(modifier = Modifier.height(6.dp))
-
-                                // Feels like
-                                Text(
-                                    text = if (isEnglish) "Feels like ${w.feelsLikeC}°C" else "महसूस होता है ${w.feelsLikeC}°C",
-                                    color = Color.White.copy(alpha = 0.6f),
-                                    fontSize = 14.sp
-                                )
-                            }
-                        }
-
-                        // ── STATS GRID ────────────────────────────────────
-                        item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                WeatherStatCard(
-                                    emoji = "💧",
-                                    value = "${w.humidity}%",
-                                    label = if (isEnglish) "Humidity" else "आर्द्रता",
-                                    modifier = Modifier.weight(1f)
-                                )
-                                WeatherStatCard(
-                                    emoji = "💨",
-                                    value = "${w.windKmph} km/h",
-                                    label = if (isEnglish) "Wind" else "हवा",
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                WeatherStatCard(
-                                    emoji = "☀️",
-                                    value = "${w.uvIndex}",
-                                    label = if (isEnglish) "UV Index" else "UV सूचकांक",
-                                    modifier = Modifier.weight(1f)
-                                )
-                                WeatherStatCard(
-                                    emoji = "👁️",
-                                    value = "${w.visibility} km",
-                                    label = if (isEnglish) "Visibility" else "दृश्यता",
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                WeatherStatCard(
-                                    emoji = "🌅",
-                                    value = w.sunrise,
-                                    label = if (isEnglish) "Sunrise" else "सूर्योदय",
-                                    modifier = Modifier.weight(1f)
-                                )
-                                WeatherStatCard(
-                                    emoji = "🌇",
-                                    value = w.sunset,
-                                    label = if (isEnglish) "Sunset" else "सूर्यास्त",
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-
-                        // ── 3-DAY FORECAST ─────────────────────────────────
-                        item {
-                            Text(
-                                text = if (isEnglish) "3-DAY FORECAST" else "3 दिन का पूर्वानुमान",
-                                color = Color.White.copy(alpha = 0.6f),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.5.sp,
-                                modifier = Modifier.padding(start = 20.dp, top = 24.dp, bottom = 10.dp)
-                            )
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                contentPadding = PaddingValues(horizontal = 16.dp)
-                            ) {
-                                items(forecasts.size) { i ->
-                                    ForecastCard(forecasts[i], isEnglish)
-                                }
-                            }
-                        }
-
-                        // ── TOURIST ADVISORY ────────────────────────────────
-                        item {
-                            val uvTip = when {
-                                w.uvIndex >= 8 -> if (isEnglish)
-                                    "🛡️ Very High UV today! Wear sunscreen SPF 50+ and a hat when visiting the fort."
-                                else
-                                    "🛡️ आज बहुत अधिक UV! किला देखते समय SPF 50+ सनस्क्रीन और टोपी पहनें।"
-                                w.uvIndex >= 5 -> if (isEnglish)
-                                    "😎 Moderate UV. Sunglasses recommended for the open fort area."
-                                else
-                                    "😎 मध्यम UV। खुले किले क्षेत्र में धूप के चश्मे की सलाह है।"
-                                else -> if (isEnglish)
-                                    "✅ Low UV. Great conditions for sightseeing!"
-                                else
-                                    "✅ कम UV। भ्रमण के लिए बेहतरीन स्थितियां!"
-                            }
-
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color.White.copy(alpha = 0.1f)
-                                )
-                            ) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Text(
-                                        text = if (isEnglish) "TOURIST ADVISORY" else "पर्यटक सलाह",
-                                        color = GoldAccent,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        letterSpacing = 1.sp
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = uvTip,
-                                        color = Color.White,
-                                        fontSize = 14.sp,
-                                        lineHeight = 20.sp
-                                    )
-                                }
-                            }
-                        }
-
-                        // ── BEST TIME TO VISIT ─────────────────────────────
-                        item {
-                            Text(
-                                text = if (isEnglish) "BEST TIME TO VISIT" else "आने का सही समय",
-                                color = Color.White.copy(alpha = 0.6f),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.5.sp,
-                                modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 10.dp)
-                            )
-                            chittorgarhSeasons.forEach { season ->
-                                SeasonCard(season = season, isEnglish = isEnglish)
-                            }
-                        }
-
-                        // Live data credit
-                        item {
-                            Text(
-                                text = "🌐 Live data from wttr.in",
-                                color = Color.White.copy(alpha = 0.35f),
-                                fontSize = 11.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
+    val gradient = remember(weather) {
+        skyGradient(weather?.weatherCode ?: 0, hourOfDay)
     }
-}
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
+    val infiniteTransition = rememberInfiniteTransition(label = "wx")
+    val spinDeg by infiniteTransition.animateFloat(
+        0f, 360f,
+        infiniteRepeatable(tween(2000, easing = LinearEasing)),
+        label = "spin"
+    )
+    val loadPulse by infiniteTransition.animateFloat(
+        0.6f, 1f,
+        infiniteRepeatable(tween(900, easing = EaseInOutSine), RepeatMode.Reverse),
+        label = "pulse"
+    )
 
-@Composable
-private fun WeatherStatCard(
-    emoji: String,
-    value: String,
-    label: String,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.10f))
-            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
-            .padding(vertical = 14.dp, horizontal = 12.dp)
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-            Text(text = emoji, fontSize = 22.sp)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = value,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = label,
-                color = Color.White.copy(alpha = 0.6f),
-                fontSize = 11.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-// ─── Forecast Card ───────────────────────────────────────────────────────────
-
-@Composable
-private fun ForecastCard(forecast: DayForecast, isEnglish: Boolean) {
     Box(
         modifier = Modifier
-            .width(120.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.10f))
-            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
-            .padding(vertical = 14.dp, horizontal = 10.dp)
+            .fillMaxSize()
+            .background(Brush.verticalGradient(gradient))
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = forecast.dayLabel,
-                color = GoldAccent,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(text = forecast.emoji, fontSize = 28.sp)
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = "${forecast.maxC}° / ${forecast.minC}°",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = forecast.description,
-                color = Color.White.copy(alpha = 0.65f),
-                fontSize = 10.sp,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                lineHeight = 13.sp
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "💧 ${forecast.avgHumidity}%",
-                color = Color.White.copy(alpha = 0.55f),
-                fontSize = 10.sp
-            )
-        }
-    }
-}
-
-// ─── Season Card ─────────────────────────────────────────────────────────────
-
-@Composable
-private fun SeasonCard(season: SeasonInfo, isEnglish: Boolean) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 5.dp),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (season.isIdeal)
-                season.color.copy(alpha = 0.25f)
-            else
-                Color.White.copy(alpha = 0.08f)
-        ),
-        border = if (season.isIdeal)
-            androidx.compose.foundation.BorderStroke(1.5.dp, season.color.copy(alpha = 0.7f))
-        else
-            androidx.compose.foundation.BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f))
-    ) {
+        // Top bar
         Row(
-            modifier = Modifier.padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(season.color.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = season.emoji, fontSize = 22.sp)
+            IconButton(onClick = onBackClick) {
+                Icon(Icons.Default.ArrowBack, null, tint = Color.White)
             }
-            Spacer(modifier = Modifier.width(14.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = if (isEnglish) season.titleEn else season.titleHi,
-                        color = if (season.isIdeal) season.color else Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        fontFamily = FontFamily.Serif
-                    )
-                    Text(
-                        text = season.monthRange,
-                        color = GoldAccent,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(modifier = Modifier.height(3.dp))
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = if (isEnglish) season.descEn else season.descHi,
-                    color = Color.White.copy(alpha = 0.7f),
-                    fontSize = 12.sp,
-                    lineHeight = 17.sp
+                    "📍 Chittorgarh, Rajasthan",
+                    color = Color.White, fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp, fontFamily = FontFamily.Serif
+                )
+                weather?.fetchTime?.let {
+                    Text("Updated $it", color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp)
+                }
+            }
+            IconButton(onClick = { refreshTrigger++ }) {
+                Icon(
+                    Icons.Default.Refresh, null,
+                    tint = Color.White.copy(alpha = 0.8f),
+                    modifier = if (isLoading) Modifier.rotate(spinDeg) else Modifier
                 )
             }
         }
+
+        when {
+            isLoading -> LoadingState(loadPulse, isEnglish)
+            hasError  -> ErrorState(isEnglish) { refreshTrigger++ }
+            weather != null -> WeatherContent(weather!!, isEnglish, hourOfDay)
+        }
     }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// LOADING / ERROR
+// ═══════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun LoadingState(pulse: Float, isEnglish: Boolean) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("🌍", fontSize = (56 * pulse).sp)
+            Spacer(Modifier.height(16.dp))
+            Text(
+                if (isEnglish) "Fetching live weather from\nOpen-Meteo (ECMWF powered)…"
+                else "Open-Meteo से लाइव मौसम ला रहे हैं…",
+                color = Color.White.copy(alpha = 0.9f), textAlign = TextAlign.Center,
+                fontSize = 15.sp, lineHeight = 22.sp, fontFamily = FontFamily.Serif
+            )
+            Spacer(Modifier.height(20.dp))
+            LinearProgressIndicator(
+                color = SaffronPrimary,
+                trackColor = Color.White.copy(alpha = 0.2f),
+                modifier = Modifier.width(200.dp).clip(RoundedCornerShape(8.dp))
+            )
+        }
+    }
+}
+
+@Composable
+private fun ErrorState(isEnglish: Boolean, onRetry: () -> Unit) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
+            Text("📡", fontSize = 56.sp)
+            Spacer(Modifier.height(16.dp))
+            Text(
+                if (isEnglish) "Could not fetch weather\nCheck internet & try again"
+                else "मौसम नहीं मिला\nइंटरनेट जांचें और दोबारा कोशिश करें",
+                color = Color.White, textAlign = TextAlign.Center,
+                fontSize = 18.sp, fontFamily = FontFamily.Serif, lineHeight = 26.sp
+            )
+            Spacer(Modifier.height(24.dp))
+            Button(onClick = onRetry, colors = ButtonDefaults.buttonColors(containerColor = SaffronPrimary)) {
+                Text(if (isEnglish) "Retry" else "पुनः प्रयास", color = Color.Black, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// MAIN CONTENT
+// ═══════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun WeatherContent(w: WeatherData, isEnglish: Boolean, hourOfDay: Int) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(top = 72.dp, bottom = 48.dp)
+    ) {
+
+        // ── HERO: Big temperature ──────────────────────────────────────────
+        item {
+            Column(
+                Modifier.fillMaxWidth().padding(top = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(wmoToEmoji(w.weatherCode), fontSize = 88.sp)
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "${w.currentTemp.toInt()}°",
+                    color = Color.White, fontSize = 96.sp,
+                    fontWeight = FontWeight.Thin, letterSpacing = (-4).sp
+                )
+                Text(
+                    if (isEnglish) wmoToDescEn(w.weatherCode) else wmoToDescHi(w.weatherCode),
+                    color = Color.White.copy(alpha = 0.9f), fontSize = 22.sp,
+                    fontFamily = FontFamily.Serif, fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    if (isEnglish) "Feels like ${w.feelsLike.toInt()}°  •  H:${w.daily.firstOrNull()?.maxTemp?.toInt()}°  L:${w.daily.firstOrNull()?.minTemp?.toInt()}°"
+                    else "महसूस ${w.feelsLike.toInt()}°  •  अधिक:${w.daily.firstOrNull()?.maxTemp?.toInt()}°  न्यून:${w.daily.firstOrNull()?.minTemp?.toInt()}°",
+                    color = Color.White.copy(alpha = 0.75f), fontSize = 15.sp
+                )
+            }
+            Spacer(Modifier.height(28.dp))
+        }
+
+        // ── HOURLY FORECAST ────────────────────────────────────────────────
+        item {
+            GlassCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                Column {
+                    SectionLabel(if (isEnglish) "HOURLY FORECAST" else "प्रति घंटा पूर्वानुमान")
+                    Spacer(Modifier.height(10.dp))
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        contentPadding = PaddingValues(horizontal = 4.dp)
+                    ) {
+                        items(w.hourly.size) { i ->
+                            HourlyCard(w.hourly[i])
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
+        // ── 7-DAY FORECAST ─────────────────────────────────────────────────
+        item {
+            GlassCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                Column {
+                    SectionLabel(if (isEnglish) "7-DAY FORECAST" else "7 दिन का पूर्वानुमान")
+                    Spacer(Modifier.height(6.dp))
+                    w.daily.forEachIndexed { i, day ->
+                        DailyRow(day, isEnglish, w.daily.minOf { it.minTemp }, w.daily.maxOf { it.maxTemp })
+                        if (i < w.daily.size - 1) HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
+                    }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
+        // ── STATS 2×3 GRID ─────────────────────────────────────────────────
+        item {
+            Column(Modifier.padding(horizontal = 16.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    StatCard(
+                        emoji = "💧", title = if (isEnglish) "HUMIDITY" else "आर्द्रता",
+                        value = "${w.humidity}%",
+                        sub = if (isEnglish) when { w.humidity > 70 -> "Feels humid" ; w.humidity > 40 -> "Comfortable" ; else -> "Very dry" }
+                              else when { w.humidity > 70 -> "उमस भरा" ; w.humidity > 40 -> "आरामदायक" ; else -> "बहुत शुष्क" },
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatCard(
+                        emoji = "🌬️", title = if (isEnglish) "WIND" else "हवा",
+                        value = "${w.windSpeed.toInt()} km/h",
+                        sub = windDirLabel(w.windDirection),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Spacer(Modifier.height(10.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    UVStatCard(uv = w.uvIndex, isEnglish = isEnglish, modifier = Modifier.weight(1f))
+                    StatCard(
+                        emoji = "👁️", title = if (isEnglish) "VISIBILITY" else "दृश्यता",
+                        value = "${"%.1f".format(w.visibility)} km",
+                        sub = if (isEnglish) when { w.visibility > 10 -> "Excellent" ; w.visibility > 5 -> "Good" ; else -> "Poor" }
+                              else when { w.visibility > 10 -> "बेहतरीन" ; w.visibility > 5 -> "अच्छा" ; else -> "कम" },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Spacer(Modifier.height(10.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    StatCard(
+                        emoji = "🔵", title = if (isEnglish) "PRESSURE" else "दबाव",
+                        value = "${w.pressure.toInt()} hPa",
+                        sub = if (isEnglish) when { w.pressure > 1013 -> "High pressure" ; else -> "Low pressure" }
+                              else when { w.pressure > 1013 -> "उच्च दबाव" ; else -> "कम दबाव" },
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatCard(
+                        emoji = "☁️", title = if (isEnglish) "CLOUD COVER" else "बादल",
+                        value = "${w.cloudCover}%",
+                        sub = if (isEnglish) when { w.cloudCover > 75 -> "Overcast" ; w.cloudCover > 25 -> "Partly cloudy" ; else -> "Clear sky" }
+                              else when { w.cloudCover > 75 -> "पूरे बादल" ; w.cloudCover > 25 -> "आंशिक बादल" ; else -> "साफ" },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
+        // ── SUNRISE / SUNSET ARC ───────────────────────────────────────────
+        item {
+            GlassCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                Column {
+                    SectionLabel(if (isEnglish) "SUNRISE & SUNSET" else "सूर्योदय और सूर्यास्त")
+                    Spacer(Modifier.height(8.dp))
+                    SunArcView(w.sunrise, w.sunset, hourOfDay)
+                    Row(
+                        Modifier.fillMaxWidth().padding(top = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("🌅", fontSize = 24.sp)
+                            Text(w.sunrise, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Text(if (isEnglish) "Sunrise" else "सूर्योदय", color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp)
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("🌇", fontSize = 24.sp)
+                            Text(w.sunset, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Text(if (isEnglish) "Sunset" else "सूर्यास्त", color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp)
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
+        // ── WIND COMPASS ──────────────────────────────────────────────────
+        item {
+            GlassCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        SectionLabel(if (isEnglish) "WIND" else "हवा")
+                        Spacer(Modifier.height(6.dp))
+                        Text("${w.windSpeed.toInt()} km/h", color = Color.White, fontSize = 36.sp, fontWeight = FontWeight.Thin)
+                        Text(
+                            windDirLabel(w.windDirection) + " — " + if (isEnglish) "Direction" else "दिशा",
+                            color = Color.White.copy(alpha = 0.65f), fontSize = 13.sp
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            if (isEnglish) "Today's max: ${w.daily.firstOrNull()?.windMax?.toInt() ?: "--"} km/h"
+                            else "आज अधिकतम: ${w.daily.firstOrNull()?.windMax?.toInt() ?: "--"} km/h",
+                            color = GoldAccent, fontSize = 12.sp
+                        )
+                    }
+                    WindCompassView(degrees = w.windDirection.toFloat(), modifier = Modifier.size(100.dp))
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
+        // ── TOURIST ADVISORY ──────────────────────────────────────────────
+        item {
+            TouristAdvisoryCard(w, isEnglish)
+            Spacer(Modifier.height(12.dp))
+        }
+
+        // ── BEST SEASON GUIDE ─────────────────────────────────────────────
+        item {
+            GlassCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                Column {
+                    SectionLabel(if (isEnglish) "CHITTORGARH VISIT GUIDE" else "चित्तौड़गढ़ यात्रा गाइड")
+                    Spacer(Modifier.height(8.dp))
+                    listOf(
+                        Triple("Oct – Mar", if (isEnglish) "🌟 Best Season — 15–28°C. Clear skies, ideal for fort walk & photography." else "🌟 सर्वश्रेष्ठ — 15–28°C। साफ आसमान, किला घूमने के लिए एकदम सही।", Color(0xFF2E7D32)),
+                        Triple("Apr – Jun", if (isEnglish) "☀️ Hot Summer — 38–45°C. Visit early morning (6–9 AM). Stay hydrated!" else "☀️ गर्म गर्मी — 38–45°C। सुबह 6–9 बजे जाएं। पानी पीते रहें!", Color(0xFFE65100)),
+                        Triple("Jul – Sep", if (isEnglish) "🌧️ Monsoon — 25–35°C. Lush green fort. Paths may be slippery." else "🌧️ मानसून — 25–35°C। हरा-भरा किला। रास्ते फिसलन भरे हो सकते हैं।", Color(0xFF1565C0))
+                    ).forEach { (period, desc, color) ->
+                        Row(Modifier.padding(vertical = 6.dp), verticalAlignment = Alignment.Top) {
+                            Text(
+                                period, color = GoldAccent,
+                                fontWeight = FontWeight.Bold, fontSize = 11.sp,
+                                modifier = Modifier.width(60.dp).padding(top = 2.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Box(Modifier.width(3.dp).height(40.dp).background(color, RoundedCornerShape(2.dp)))
+                            Spacer(Modifier.width(10.dp))
+                            Text(desc, color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp, lineHeight = 18.sp, modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
+        // ── CREDIT ────────────────────────────────────────────────────────
+        item {
+            Text(
+                "⚡ Powered by Open-Meteo (ECMWF) — Free & Open Source",
+                color = Color.White.copy(alpha = 0.35f), fontSize = 10.sp,
+                textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// COMPONENT: Hourly Card
+// ═══════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun HourlyCard(item: HourlyItem) {
+    Column(
+        modifier = Modifier
+            .width(58.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color.White.copy(alpha = 0.12f))
+            .padding(vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(item.hour, color = Color.White.copy(alpha = 0.7f), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(4.dp))
+        Text(wmoToEmoji(item.weatherCode), fontSize = 20.sp)
+        Spacer(Modifier.height(4.dp))
+        Text("${item.temp.toInt()}°", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        if (item.precipProb > 0) {
+            Spacer(Modifier.height(2.dp))
+            Text("💧${item.precipProb}%", color = Color(0xFF64B5F6), fontSize = 9.sp)
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// COMPONENT: Daily Row
+// ═══════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun DailyRow(day: DailyItem, isEnglish: Boolean, globalMin: Double, globalMax: Double) {
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(day.dayLabel, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(90.dp))
+        Text(wmoToEmoji(day.weatherCode), fontSize = 20.sp)
+        Spacer(Modifier.width(8.dp))
+        if (day.precipSum > 0.1) {
+            Text("💧${"%.0f".format(day.precipSum)}mm", color = Color(0xFF64B5F6), fontSize = 10.sp, modifier = Modifier.width(46.dp))
+        } else {
+            Spacer(Modifier.width(46.dp))
+        }
+        Spacer(Modifier.weight(1f))
+        Text("${day.minTemp.toInt()}°", color = Color.White.copy(alpha = 0.55f), fontSize = 13.sp, modifier = Modifier.width(28.dp), textAlign = TextAlign.End)
+        Spacer(Modifier.width(6.dp))
+        // Temperature bar
+        val range = (globalMax - globalMin).let { if (it == 0.0) 1.0 else it }
+        val barStart = ((day.minTemp - globalMin) / range).toFloat()
+        val barEnd   = ((day.maxTemp - globalMin) / range).toFloat()
+        Canvas(modifier = Modifier.width(70.dp).height(5.dp)) {
+            drawLine(Color.White.copy(alpha = 0.25f), Offset(0f, size.height / 2), Offset(size.width, size.height / 2), 5.dp.toPx(), StrokeCap.Round)
+            drawLine(
+                Brush.linearGradient(listOf(Color(0xFF64B5F6), SaffronPrimary, Color(0xFFE53935))),
+                Offset(barStart * size.width, size.height / 2),
+                Offset(barEnd * size.width, size.height / 2),
+                5.dp.toPx(), StrokeCap.Round
+            )
+        }
+        Spacer(Modifier.width(6.dp))
+        Text("${day.maxTemp.toInt()}°", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(28.dp))
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// COMPONENT: Stat Cards
+// ═══════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun StatCard(emoji: String, title: String, value: String, sub: String, modifier: Modifier = Modifier) {
+    GlassCard(modifier = modifier) {
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(emoji, fontSize = 14.sp)
+                Spacer(Modifier.width(4.dp))
+                Text(title, color = Color.White.copy(alpha = 0.6f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(value, color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Thin, letterSpacing = (-0.5).sp)
+            Spacer(Modifier.height(2.dp))
+            Text(sub, color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp)
+        }
+    }
+}
+
+@Composable
+private fun UVStatCard(uv: Double, isEnglish: Boolean, modifier: Modifier = Modifier) {
+    GlassCard(modifier = modifier) {
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("☀️", fontSize = 14.sp)
+                Spacer(Modifier.width(4.dp))
+                Text("UV INDEX", color = Color.White.copy(alpha = 0.6f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+            }
+            Spacer(Modifier.height(8.dp))
+            Text("${uv.toInt()}", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Thin)
+            Spacer(Modifier.height(4.dp))
+            // UV bar
+            Box(
+                Modifier.fillMaxWidth().height(6.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(Brush.horizontalGradient(listOf(Color(0xFF4CAF50), Color(0xFFFFEB3B), Color(0xFFFF9800), Color(0xFFE53935), Color(0xFF9C27B0))))
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(uvLabel(uv, isEnglish), color = uvColor(uv), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// COMPONENT: Sun Arc
+// ═══════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun SunArcView(sunrise: String, sunset: String, hourOfDay: Int) {
+    val progress = remember(hourOfDay) {
+        val sr = 6f; val ss = 19f
+        val now = hourOfDay.toFloat()
+        ((now - sr) / (ss - sr)).coerceIn(0f, 1f)
+    }
+    Canvas(modifier = Modifier.fillMaxWidth().height(100.dp)) {
+        val w = size.width; val h = size.height
+        val padding = 40.dp.toPx()
+        val cx = w / 2f; val cy = h + 10.dp.toPx()
+        val rx = (w / 2f) - padding; val ry = h - 16.dp.toPx()
+
+        // Arc path
+        val arcColor = Color.White.copy(alpha = 0.25f)
+        drawArc(
+            color = arcColor, startAngle = 180f, sweepAngle = 180f, useCenter = false,
+            topLeft = Offset(cx - rx, cy - ry), size = Size(rx * 2, ry * 2),
+            style = Stroke(width = 2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f)))
+        )
+
+        // Gradient arc (dawn to dusk)
+        val sweep = 180f * progress
+        drawArc(
+            brush = Brush.linearGradient(listOf(Color(0xFFF5C843), Color(0xFFE8824A), Color(0xFF9C27B0))),
+            startAngle = 180f, sweepAngle = sweep, useCenter = false,
+            topLeft = Offset(cx - rx, cy - ry), size = Size(rx * 2, ry * 2),
+            style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
+        )
+
+        // Sun dot position
+        val rad = Math.toRadians((180.0 + 180.0 * progress)).toFloat()
+        val sunX = cx + rx * kotlin.math.cos(rad)
+        val sunY = cy + ry * kotlin.math.sin(rad)
+
+        // Glow
+        drawCircle(SaffronPrimary.copy(alpha = 0.3f), radius = 16.dp.toPx(), center = Offset(sunX, sunY))
+        drawCircle(SaffronPrimary, radius = 8.dp.toPx(), center = Offset(sunX, sunY))
+
+        // Horizon line
+        drawLine(Color.White.copy(alpha = 0.15f), Offset(padding, cy), Offset(w - padding, cy), 1.dp.toPx())
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// COMPONENT: Wind Compass
+// ═══════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun WindCompassView(degrees: Float, modifier: Modifier = Modifier) {
+    val rotation = remember(degrees) { degrees }
+    Canvas(modifier = modifier) {
+        val cx = size.width / 2; val cy = size.height / 2
+        val r = minOf(cx, cy) - 4.dp.toPx()
+
+        // Outer circle
+        drawCircle(Color.White.copy(alpha = 0.15f), radius = r, center = Offset(cx, cy), style = Stroke(1.dp.toPx()))
+
+        // Cardinal labels drawn manually:
+        val labels = listOf("N" to 0f, "E" to 90f, "S" to 180f, "W" to 270f)
+        labels.forEach { (_, angle) ->
+            val rad = Math.toRadians(angle.toDouble() - 90)
+            val tx = cx + (r - 10.dp.toPx()) * kotlin.math.cos(rad).toFloat()
+            val ty = cy + (r - 10.dp.toPx()) * kotlin.math.sin(rad).toFloat()
+            drawCircle(Color.White.copy(alpha = 0.4f), 2.dp.toPx(), Offset(tx, ty))
+        }
+
+        // Arrow pointing TO wind direction
+        val arrowRad = Math.toRadians(rotation.toDouble() - 90)
+        val tipX = cx + r * 0.6f * kotlin.math.cos(arrowRad).toFloat()
+        val tipY = cy + r * 0.6f * kotlin.math.sin(arrowRad).toFloat()
+        val tailX = cx - r * 0.5f * kotlin.math.cos(arrowRad).toFloat()
+        val tailY = cy - r * 0.5f * kotlin.math.sin(arrowRad).toFloat()
+
+        drawLine(
+            brush = Brush.linearGradient(listOf(SaffronPrimary, Color(0xFFE53935))),
+            start = Offset(tailX, tailY), end = Offset(tipX, tipY),
+            strokeWidth = 4.dp.toPx(), cap = StrokeCap.Round
+        )
+        drawCircle(SaffronPrimary, 5.dp.toPx(), Offset(tipX, tipY))
+        drawCircle(Color.White.copy(alpha = 0.5f), 3.dp.toPx(), Offset(tailX, tailY))
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// COMPONENT: Tourist Advisory
+// ═══════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun TouristAdvisoryCard(w: WeatherData, isEnglish: Boolean) {
+    val tips = buildList {
+        if (w.uvIndex >= 8) add(if (isEnglish) "🛡️ Very High UV! Use SPF 50+ sunscreen & hat at the fort." else "🛡️ बहुत अधिक UV! किले पर SPF 50+ और टोपी जरूरी।")
+        if (w.currentTemp >= 38) add(if (isEnglish) "🥤 Extreme heat! Carry 2L+ water. Visit early morning or evening only." else "🥤 भीषण गर्मी! 2 लीटर पानी रखें। सुबह या शाम ही जाएं।")
+        if (w.windSpeed >= 40) add(if (isEnglish) "💨 Strong winds — be cautious on fort towers and open areas." else "💨 तेज हवाएं — किले के मीनारों पर सावधान रहें।")
+        if (w.weatherCode in 51..82) add(if (isEnglish) "☔ Rain expected! Carry umbrella. Fort paths may be slippery." else "☔ बारिश की संभावना! छाता रखें। किले के रास्ते फिसलन भरे हो सकते हैं।")
+        if (w.visibility < 3) add(if (isEnglish) "🌫️ Low visibility. Photography may be difficult today." else "🌫️ कम दृश्यता। आज फोटोग्राफी मुश्किल हो सकती है।")
+        val uvNow = w.uvIndex
+        val isGoodTime = w.currentTemp < 35 && uvNow < 7
+        if (isGoodTime) add(if (isEnglish) "✅ Great conditions for visiting the fort right now!" else "✅ अभी किला देखने के लिए बेहतरीन मौसम है!")
+        if (isEmpty()) add(if (isEnglish) "ℹ️ Standard conditions. Stay hydrated and enjoy Chittorgarh!" else "ℹ️ सामान्य मौसम। पानी पीते रहें और चित्तौड़गढ़ का आनंद लें!")
+    }
+
+    GlassCard(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        tint = Color(0xFFB71C1C).copy(alpha = 0.15f)
+    ) {
+        Column {
+            SectionLabel(if (isEnglish) "TOURIST ADVISORY — TODAY" else "पर्यटक सलाह — आज")
+            Spacer(Modifier.height(8.dp))
+            tips.forEach { tip ->
+                Text(tip, color = Color.White, fontSize = 13.sp, lineHeight = 20.sp, modifier = Modifier.padding(bottom = 6.dp))
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// SHARED: Glass Card
+// ═══════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun GlassCard(
+    modifier: Modifier = Modifier,
+    tint: Color = Color.White.copy(alpha = 0.10f),
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(tint)
+            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(20.dp))
+    ) {
+        Column(modifier = Modifier.padding(16.dp), content = content)
+    }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text, color = Color.White.copy(alpha = 0.55f),
+        fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp
+    )
 }

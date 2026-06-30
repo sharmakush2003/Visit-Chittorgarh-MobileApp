@@ -373,7 +373,9 @@ private fun ShareLocationCard(
     onShareClick: () -> Unit,
     onSendSMS: (Double, Double) -> Unit
 ) {
+    val context = LocalContext.current
     Card(
+
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 14.dp),
@@ -605,8 +607,8 @@ private fun SMSButton(
     color: Color,
     onClick: () -> Unit
 ) {
-    val context = LocalContext.current
     Button(
+
         onClick = onClick,
         modifier = Modifier.fillMaxWidth().height(46.dp),
         shape = RoundedCornerShape(12.dp),

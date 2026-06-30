@@ -136,21 +136,22 @@ fun AuthScreen(
                 )
         )
 
-        // Responsive Scrollable Container
+        // Responsive Container
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .statusBarsPadding()
-                .navigationBarsPadding()
-                .padding(24.dp),
+                .navigationBarsPadding(),
             contentAlignment = Alignment.Center
         ) {
             Column(
                 modifier = Modifier
                     .widthIn(max = 460.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
                 // Gold Logo
                 GoldFortLogo(
@@ -234,6 +235,7 @@ fun AuthScreen(
                                     containerColor = Color.White,
                                     contentColor = Color.Black
                                 ),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                             ) {
                                 Row(
@@ -243,15 +245,15 @@ fun AuthScreen(
                                     Image(
                                         painter = painterResource(id = R.drawable.ic_google),
                                         contentDescription = "Google Logo",
-                                        modifier = Modifier.size(24.dp)
+                                        modifier = Modifier.size(22.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Spacer(modifier = Modifier.width(10.dp))
                                     Text(
                                         text = if (isEnglish) "Continue with Google" else "गूगल के साथ जारी रखें",
                                         fontWeight = FontWeight.Bold,
-                                        fontFamily = FontFamily.Serif,
-                                        fontSize = 16.sp,
-                                        color = Color.Black
+                                        fontSize = 14.sp,
+                                        color = Color.Black,
+                                        maxLines = 1
                                     )
                                 }
                             }

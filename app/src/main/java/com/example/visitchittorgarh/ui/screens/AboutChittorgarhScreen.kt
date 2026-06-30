@@ -55,7 +55,7 @@ fun AboutChittorgarhScreen(
             nameHi = "चित्तौड़गढ़ किला",
             descEn = "The largest fort in India, standing on a 180m hill. It is the core center of Rajput pride, featuring seven majestic gates and royal palaces.",
             descHi = "180 मीटर ऊँची पहाड़ी पर स्थित भारत का सबसे बड़ा किला। यह राजपूत गौरव का मुख्य केंद्र है, जिसमें सात राजसी द्वार और शाही महल बने हैं।",
-            image = "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=800&auto=format&fit=crop"
+            image = R.drawable.chittorgarh_fort
         ),
         TouristPlace(
             nameEn = "Vijay Stambh (Tower of Victory)",

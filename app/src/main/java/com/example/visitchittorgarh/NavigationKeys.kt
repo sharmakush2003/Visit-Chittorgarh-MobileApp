@@ -27,5 +27,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object EmergencyContacts : NavKey
 
-@Serializable data object FoodRestaurants : NavKey
+@Serializable data object Weather : NavKey
 

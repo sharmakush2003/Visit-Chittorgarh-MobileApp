@@ -17,7 +17,7 @@ import com.example.visitchittorgarh.ui.screens.AboutDeveloperScreen
 import com.example.visitchittorgarh.ui.screens.AboutChittorgarhScreen
 import com.example.visitchittorgarh.ui.screens.HowToReachScreen
 import com.example.visitchittorgarh.ui.screens.EmergencyContactsScreen
-import com.example.visitchittorgarh.ui.screens.FoodRestaurantsScreen
+import com.example.visitchittorgarh.ui.screens.WeatherScreen
 
 
 import androidx.compose.runtime.LaunchedEffect
@@ -95,8 +95,8 @@ fun MainNavigation() {
             onEmergencyContactsClick = {
               backStack.add(EmergencyContacts)
             },
-            onFoodRestaurantsClick = {
-              backStack.add(FoodRestaurants)
+            onWeatherClick = {
+              backStack.add(Weather)
             }
           )
         }
@@ -161,9 +161,9 @@ fun MainNavigation() {
             onBackClick = { backStack.removeLastOrNull() }
           )
         }
-        entry<FoodRestaurants> {
+        entry<Weather> {
           val isEnglish = sharedPrefs.getBoolean("is_english", true)
-          FoodRestaurantsScreen(
+          WeatherScreen(
             isEnglish = isEnglish,
             onBackClick = { backStack.removeLastOrNull() }
           )

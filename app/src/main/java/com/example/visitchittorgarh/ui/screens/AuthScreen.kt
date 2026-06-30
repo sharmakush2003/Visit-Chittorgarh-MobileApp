@@ -221,7 +221,9 @@ fun AuthScreen(
                                         .requestEmail()
                                         .build()
                                     val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                                    googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                                    googleSignInClient.signOut().addOnCompleteListener {
+                                        googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                                    }
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()

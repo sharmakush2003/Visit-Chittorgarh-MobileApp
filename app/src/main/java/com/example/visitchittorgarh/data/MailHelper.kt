@@ -66,7 +66,7 @@ object MailHelper {
                             <!-- Hero Image -->
                             <tr>
                                 <td align="center" style="padding: 0;">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Vijay_Stambh_Chittorgarh_01.jpg/640px-Vijay_Stambh_Chittorgarh_01.jpg" alt="Chittorgarh Vijay Stambh" width="100%" style="display: block; width: 100%; max-height: 280px; object-fit: cover;">
+                                    <img src="https://raw.githubusercontent.com/sharmakush2003/Visit-Chittorgarh-MobileApp/main/app/src/main/res/drawable/vijay_stambh.jpg" alt="Chittorgarh Vijay Stambh" width="100%" style="display: block; width: 100%; max-height: 280px; object-fit: cover;">
                                 </td>
                             </tr>
 
@@ -96,7 +96,7 @@ object MailHelper {
 
                                     <!-- Button -->
                                     <div style="text-align: center; margin-top: 35px;">
-                                        <a href="https://chittorgarhtourism.in" target="_blank" style="background-color: #1A365D; color: #D4AF37; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; border: 2px solid #D4AF37; display: inline-block; box-shadow: 0 4px 6px rgba(26,54,93,0.2);">EXPLORE CHITTORGARH</a>
+                                        <a href="https://www.visitchittorgarh.in" target="_blank" style="background-color: #1A365D; color: #D4AF37; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; border: 2px solid #D4AF37; display: inline-block; box-shadow: 0 4px 6px rgba(26,54,93,0.2);">EXPLORE CHITTORGARH</a>
                                     </div>
                                 </td>
                             </tr>

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.airbnb.lottie.compose.*
 import com.example.visitchittorgarh.R
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -90,10 +92,21 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(top = 30.dp)
             ) {
-                GoldFortLogo(
+                // ── Lottie Fort Glow Animation ────────────────────────────
+                val lottieComposition by rememberLottieComposition(
+                    LottieCompositionSpec.Asset("fort_glow.json")
+                )
+                val lottieProgress by animateLottieCompositionAsState(
+                    composition = lottieComposition,
+                    iterations = LottieConstants.IterateForever,
+                    speed = 0.85f
+                )
+                LottieAnimation(
+                    composition = lottieComposition,
+                    progress = { lottieProgress },
                     modifier = Modifier
-                        .size(90.dp)
-                        .padding(bottom = 12.dp)
+                        .size(110.dp)
+                        .padding(bottom = 8.dp)
                 )
                 Text(
                     text = "Visit",

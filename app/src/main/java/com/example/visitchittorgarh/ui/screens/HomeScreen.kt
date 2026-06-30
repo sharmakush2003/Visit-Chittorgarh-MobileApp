@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -46,6 +47,13 @@ fun HomeScreen(
     var selectedCategory by remember { mutableStateOf("All") }
     var selectedAttraction by remember { mutableStateOf<Attraction?>(null) }
 
+    // Track whether data has ever arrived (distinguishes "loading" from "empty result")
+    var dataEverLoaded by remember { mutableStateOf(false) }
+    LaunchedEffect(attractions) {
+        if (attractions.isNotEmpty()) dataEverLoaded = true
+    }
+    val isLoading = !dataEverLoaded
+
     val categories = listOf("All", "Heritage", "Spiritual", "Nature", "Scenic")
     val categoryDisplay = mapOf(
         "All" to if (isEnglish) "All" else "सभी",
@@ -62,173 +70,228 @@ fun HomeScreen(
         matchesSearch && matchesCategory
     }
 
+    // ── Parallax scroll state ──────────────────────────────────────────────
+    val listState = rememberLazyListState()
+    // Scroll offset of first item in pixels → used to push the hero image upward
+    val heroParallaxOffset by remember {
+        derivedStateOf {
+            if (listState.firstVisibleItemIndex == 0) {
+                listState.firstVisibleItemScrollOffset * 0.45f  // 45% parallax ratio
+            } else 0f
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 80.dp)
-        ) {
-            // Hero Image Header
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    contentAlignment = Alignment.BottomStart
-                ) {
-                    AsyncImage(
-                        model = "https://www.visitchittorgarh.in/assets/images/fateh-prakash-new.jpg",
-                        contentDescription = "Fateh Prakash Palace Hero Banner",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Black.copy(alpha = 0.1f),
-                                        Color.Black.copy(alpha = 0.8f)
-                                    )
-                                )
-                            )
-                    )
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text(
-                            text = if (isEnglish) "Mewar Kingdom" else "मेवाड़ साम्राज्य",
-                            color = SaffronPrimary,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Serif,
-                            letterSpacing = 1.5.sp
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = if (isEnglish) "Royal Chittorgarh" else "शाही चित्तौड़गढ़",
-                            color = Color.White,
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Serif,
-                            letterSpacing = 1.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = if (isEnglish) "The Land of Valour & Sacrifice" else "वीरता और त्याग की भूमि",
-                            color = Color.White.copy(alpha = 0.8f),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = FontFamily.SansSerif
-                        )
-                    }
-                }
-            }
-
-            // Search Bar & Filter Chips
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp)
-                ) {
-                    // Search bar
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text(if (isEnglish) "Search fort, temples, sanctuaries..." else "किला, मंदिर, अभयारण्य खोजें...") },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = SaffronPrimary) },
-                        shape = RoundedCornerShape(12.dp),
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = SaffronPrimary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // Categories slider
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(categories) { cat ->
-                            val isSelected = selectedCategory == cat
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { selectedCategory = cat },
-                                label = { 
-                                    Text(
-                                        text = categoryDisplay[cat] ?: cat,
-                                        fontWeight = FontWeight.Bold,
-                                        fontFamily = FontFamily.Serif
-                                    ) 
-                                },
-                                border = FilterChipDefaults.filterChipBorder(
-                                    enabled = true,
-                                    selected = isSelected,
-                                    borderColor = SaffronPrimary,
-                                    selectedBorderColor = SaffronPrimary,
-                                    borderWidth = 1.dp
-                                ),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = SaffronPrimary.copy(alpha = 0.15f),
-                                    selectedLabelColor = SaffronPrimary,
-                                    containerColor = Color.Transparent,
-                                    labelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Attractions list
-            if (filteredAttractions.isEmpty()) {
+        if (isLoading) {
+            // ── SHIMMER SKELETON STATE ─────────────────────────────────────
+            com.example.visitchittorgarh.ui.components.HomeScreenSkeleton()
+        } else {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 80.dp)
+            ) {
+                // ── PARALLAX HERO BANNER ───────────────────────────────────
                 item {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(32.dp),
-                        contentAlignment = Alignment.Center
+                            .height(280.dp)
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 0.dp, bottomEnd = 0.dp)),
+                        contentAlignment = Alignment.BottomStart
                     ) {
-                        Text(
-                            text = if (isEnglish) "No attractions found matching your search." else "आपकी खोज से मेल खाता कोई पर्यटन स्थल नहीं मिला।",
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-                            fontSize = 15.sp,
-                            fontFamily = FontFamily.Serif
+                        // Hero image shifted upward by parallax offset so it "scrolls slower"
+                        AsyncImage(
+                            model = "https://www.visitchittorgarh.in/assets/images/fateh-prakash-new.jpg",
+                            contentDescription = "Fateh Prakash Palace Hero Banner",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                // Extra height so the image fills the box even when offset up
+                                .height(340.dp)
+                                .offset(y = (-heroParallaxOffset / 3f).dp)
+                        )
+                        // Dark gradient overlay
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color.Black.copy(alpha = 0.05f),
+                                            Color.Black.copy(alpha = 0.85f)
+                                        )
+                                    )
+                                )
+                        )
+                        // Text content
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Text(
+                                text = if (isEnglish) "Mewar Kingdom" else "मेवाड़ साम्राज्य",
+                                color = SaffronPrimary,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Serif,
+                                letterSpacing = 1.5.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = if (isEnglish) "Royal Chittorgarh" else "शाही चित्तौड़गढ़",
+                                color = Color.White,
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Serif,
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = if (isEnglish) "The Land of Valour & Sacrifice" else "वीरता और त्याग की भूमि",
+                                color = Color.White.copy(alpha = 0.8f),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                fontFamily = FontFamily.SansSerif
+                            )
+                            Spacer(modifier = Modifier.height(14.dp))
+                            // Explore Packages pill button in hero
+                            Surface(
+                                onClick = onPlanJourneyClick,
+                                shape = RoundedCornerShape(20.dp),
+                                color = SaffronPrimary.copy(alpha = 0.9f),
+                                modifier = Modifier.wrapContentWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = null,
+                                        tint = Color.Black,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = if (isEnglish) "View Packages" else "पैकेज देखें",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp,
+                                        fontFamily = FontFamily.Serif
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Search Bar & Filter Chips
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 16.dp)
+                    ) {
+                        // Search bar
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text(if (isEnglish) "Search fort, temples, sanctuaries..." else "किला, मंदिर, अभयारण्य खोजें...") },
+                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = SaffronPrimary) },
+                            shape = RoundedCornerShape(12.dp),
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = SaffronPrimary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // Categories slider
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(categories) { cat ->
+                                val isSelected = selectedCategory == cat
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { selectedCategory = cat },
+                                    label = { 
+                                        Text(
+                                            text = categoryDisplay[cat] ?: cat,
+                                            fontWeight = FontWeight.Bold,
+                                            fontFamily = FontFamily.Serif
+                                        ) 
+                                    },
+                                    border = FilterChipDefaults.filterChipBorder(
+                                        enabled = true,
+                                        selected = isSelected,
+                                        borderColor = SaffronPrimary,
+                                        selectedBorderColor = SaffronPrimary,
+                                        borderWidth = 1.dp
+                                    ),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = SaffronPrimary.copy(alpha = 0.15f),
+                                        selectedLabelColor = SaffronPrimary,
+                                        containerColor = Color.Transparent,
+                                        labelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Attractions list
+                if (filteredAttractions.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (isEnglish) "No attractions found matching your search." else "आपकी खोज से मेल खाता कोई पर्यटन स्थल नहीं मिला।",
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                                fontSize = 15.sp,
+                                fontFamily = FontFamily.Serif
+                            )
+                        }
+                    }
+                } else {
+                    items(filteredAttractions) { attraction ->
+                        AttractionCard(
+                            attraction = attraction,
+                            isEnglish = isEnglish,
+                            onClick = { selectedAttraction = attraction }
                         )
                     }
                 }
-            } else {
-                items(filteredAttractions) { attraction ->
-                    AttractionCard(
-                        attraction = attraction,
-                        isEnglish = isEnglish,
-                        onClick = { selectedAttraction = attraction }
-                    )
-                }
             }
-        }
 
-        // Attraction Details Dialog
-        selectedAttraction?.let { attraction ->
-            DetailDialog(
-                attraction = attraction,
-                isEnglish = isEnglish,
-                onDismiss = { selectedAttraction = null },
-                onPlanClick = {
-                    selectedAttraction = null
-                    onPlanJourneyClick()
-                }
-            )
+            // Attraction Details Dialog
+            selectedAttraction?.let { attraction ->
+                DetailDialog(
+                    attraction = attraction,
+                    isEnglish = isEnglish,
+                    onDismiss = { selectedAttraction = null },
+                    onPlanClick = {
+                        selectedAttraction = null
+                        onPlanJourneyClick()
+                    }
+                )
+            }
         }
     }
 }
+
+
 
 @Composable
 fun AttractionCard(

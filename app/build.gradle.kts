@@ -135,4 +135,7 @@ dependencies {
   // JavaMail API for SMTP
   implementation("com.sun.mail:android-mail:1.6.7")
   implementation("com.sun.mail:android-activation:1.6.7")
+
+  // Lottie for Compose - Rich vector animations
+  implementation("com.airbnb.android:lottie-compose:6.4.1")
 }

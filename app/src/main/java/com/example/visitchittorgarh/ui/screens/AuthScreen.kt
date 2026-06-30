@@ -9,12 +9,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -44,7 +40,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import com.example.visitchittorgarh.data.MailHelper
 
@@ -69,24 +64,13 @@ fun AuthScreen(
     
     // Animate glowing border opacity
     val glowOpacity by infiniteTransition.animateFloat(
-        initialValue = 0.4f,
+        initialValue = 0.5f,
         targetValue = 1.0f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2200, easing = FastOutSlowInEasing),
+            animation = tween(durationMillis = 2000, easing = EaseInOutSine),
             repeatMode = RepeatMode.Reverse
         ),
         label = "border_opacity"
-    )
-
-    // Animate pulse scale of the background glow
-    val pulseScale by infiniteTransition.animateFloat(
-        initialValue = 0.96f,
-        targetValue = 1.04f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 3000, easing = EaseInOutSine),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulse_scale"
     )
 
     val googleSignInLauncher = rememberLauncherForActivityResult(
@@ -147,301 +131,264 @@ fun AuthScreen(
             modifier = Modifier.fillMaxSize()
         )
 
-        // Triple Layer Rich Dark Gradient Overlay (Crimson/Gold theme)
+        // Dark gradient overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color.Black.copy(alpha = 0.75f),
-                            CrimsonDark.copy(alpha = 0.55f),
-                            Color.Black.copy(alpha = 0.98f)
+                            Color.Black.copy(alpha = 0.7f),
+                            CrimsonDark.copy(alpha = 0.5f),
+                            Color.Black.copy(alpha = 0.95f)
                         )
                     )
                 )
         )
 
-        // Soft background glow pulse behind the card
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(340.dp)
-                .scale(pulseScale)
-                .alpha(glowOpacity * 0.15f)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(SaffronPrimary, Color.Transparent)
-                    )
-                )
-        )
-
-        // Scrollable Screen Container
-        Box(
+        // Fixed Non-Scrollable Single Page Container
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .navigationBarsPadding(),
-            contentAlignment = Alignment.Center
+                .navigationBarsPadding()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
+            // Top Section: Crest & Brand Header
             Column(
-                modifier = Modifier
-                    .widthIn(max = 460.dp)
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier.padding(top = 16.dp)
             ) {
-                // Royal Logo Crest
-                Box(
+                // Gold Fort Logo directly without outer border box to avoid double circle issue
+                GoldFortLogo(
                     modifier = Modifier
-                        .size(116.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.04f))
-                        .border(
-                            BorderStroke(
-                                2.dp,
-                                Brush.sweepGradient(listOf(GoldAccent, SaffronPrimary, CrimsonSecondary, GoldAccent))
-                            ),
-                            CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    GoldFortLogo(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .padding(bottom = 6.dp)
-                    )
-                }
+                        .size(86.dp)
+                        .padding(bottom = 8.dp)
+                )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // App Title
                 Text(
                     text = if (isEnglish) "Chittorgarh Tourism" else "चित्तौड़गढ़ पर्यटन",
                     color = SaffronPrimary,
-                    fontSize = 30.sp,
+                    fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Serif,
-                    letterSpacing = 1.5.sp,
+                    letterSpacing = 1.sp,
                     textAlign = TextAlign.Center
                 )
 
                 Text(
                     text = if (isEnglish) "Proud Symbol of Mewar Sovereignty" else "मेवाड़ संप्रभुता का गौरवशाली प्रतीक",
-                    color = GoldAccent.copy(alpha = 0.85f),
-                    fontSize = 12.sp,
+                    color = GoldAccent.copy(alpha = 0.8f),
+                    fontSize = 11.5.sp,
                     fontWeight = FontWeight.SemiBold,
                     fontFamily = FontFamily.SansSerif,
-                    letterSpacing = 0.5.sp,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.padding(top = 2.dp)
                 )
+            }
 
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // The World's Best Glassmorphic Card (Translucent, glowing double border)
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(
-                            BorderStroke(
-                                1.5.dp,
-                                Brush.verticalGradient(
-                                    listOf(
-                                        SaffronPrimary.copy(alpha = glowOpacity),
-                                        CrimsonSecondary.copy(alpha = 0.2f),
-                                        GoldAccent.copy(alpha = glowOpacity)
-                                    )
+            // Middle Section: Premium Translucent Login Card
+            Card(
+                modifier = Modifier
+                    .widthIn(max = 420.dp)
+                    .fillMaxWidth()
+                    .border(
+                        BorderStroke(
+                            1.5.dp,
+                            Brush.verticalGradient(
+                                listOf(
+                                    SaffronPrimary.copy(alpha = glowOpacity),
+                                    CrimsonSecondary.copy(alpha = 0.2f),
+                                    GoldAccent.copy(alpha = glowOpacity)
                                 )
-                            ),
-                            shape = RoundedCornerShape(32.dp)
+                            )
                         ),
-                    shape = RoundedCornerShape(32.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.78f)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 24.dp)
+                        shape = RoundedCornerShape(28.dp)
+                    ),
+                shape = RoundedCornerShape(28.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.75f)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Text(
+                        text = if (isEnglish) "Welcome to Chittorgarh" else "चित्तौड़गढ़ में आपका स्वागत है",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif,
+                        color = SaffronPrimary,
+                        textAlign = TextAlign.Center
+                    )
+
+                    // Traditional Diamond Centerpiece Divider
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 10.dp)
                     ) {
-                        // Title Inside Card
-                        Text(
-                            text = if (isEnglish) "Welcome to Chittorgarh" else "चित्तौड़गढ़ में आपका स्वागत है",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Serif,
-                            color = SaffronPrimary,
-                            textAlign = TextAlign.Center
+                        HorizontalDivider(
+                            modifier = Modifier.weight(1f),
+                            thickness = 1.dp,
+                            color = SaffronPrimary.copy(alpha = 0.25f)
                         )
-
-                        // Traditional Website Ornament Divider
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(vertical = 12.dp)
-                        ) {
-                            HorizontalDivider(
-                                modifier = Modifier.weight(1f),
-                                thickness = 1.dp,
-                                color = SaffronPrimary.copy(alpha = 0.25f)
-                            )
-                            Text(
-                                text = "  ◆  ",
-                                color = GoldAccent,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            HorizontalDivider(
-                                modifier = Modifier.weight(1f),
-                                thickness = 1.dp,
-                                color = SaffronPrimary.copy(alpha = 0.25f)
-                            )
-                        }
-
                         Text(
-                            text = if (isEnglish) {
-                                "Explore the land of historic forts, legendary stories of bravery, and rich heritage. Sign in to start your royal journey."
-                            } else {
-                                "ऐतिहासिक किलों, वीरता की गौरवशाली कहानियों और समृद्ध विरासत की भूमि का अन्वेषण करें। अपनी शाही यात्रा शुरू करने के लिए लॉगिन करें।"
-                            },
-                            fontSize = 14.sp,
-                            color = Color.White.copy(alpha = 0.85f),
-                            textAlign = TextAlign.Center,
-                            lineHeight = 22.sp,
-                            modifier = Modifier.padding(horizontal = 6.dp)
+                            text = "  ◆  ",
+                            color = GoldAccent,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
                         )
+                        HorizontalDivider(
+                            modifier = Modifier.weight(1f),
+                            thickness = 1.dp,
+                            color = SaffronPrimary.copy(alpha = 0.25f)
+                        )
+                    }
 
-                        Spacer(modifier = Modifier.height(32.dp))
-
-                        if (isLoading) {
-                            CircularProgressIndicator(
-                                color = SaffronPrimary,
-                                strokeWidth = 3.dp,
-                                modifier = Modifier.size(40.dp)
-                            )
+                    Text(
+                        text = if (isEnglish) {
+                            "Explore the land of historic forts, legendary stories of bravery, and rich heritage. Sign in to start your royal journey."
                         } else {
-                            // High-End Luxury Google Sign-In Card Button (With gold gradient glow background)
-                            Card(
-                                onClick = {
-                                    isLoading = true
-                                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                        .requestIdToken(context.getString(R.string.default_web_client_id))
-                                        .requestEmail()
-                                        .build()
-                                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                                    googleSignInClient.signOut().addOnCompleteListener {
-                                        googleSignInLauncher.launch(googleSignInClient.signInIntent)
-                                    }
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp)
-                                    .border(
-                                        BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
-                                        shape = RoundedCornerShape(16.dp)
-                                    ),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color.White
+                            "ऐतिहासिक किलों, वीरता की गौरवशाली कहानियों और समृद्ध विरासत की भूमि का अन्वेषण करें। अपनी शाही यात्रा शुरू करने के लिए लॉगिन करें।"
+                        },
+                        fontSize = 13.sp,
+                        color = Color.White.copy(alpha = 0.85f),
+                        textAlign = TextAlign.Center,
+                        lineHeight = 18.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(54.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = SaffronPrimary, modifier = Modifier.size(32.dp))
+                        }
+                    } else {
+                        // Premium Google Sign-In Card Button (With internal gradient)
+                        Card(
+                            onClick = {
+                                isLoading = true
+                                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                    .requestIdToken(context.getString(R.string.default_web_client_id))
+                                    .requestEmail()
+                                    .build()
+                                val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                                googleSignInClient.signOut().addOnCompleteListener {
+                                    googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                                .border(
+                                    BorderStroke(1.dp, Color.White.copy(alpha = 0.12f)),
+                                    shape = RoundedCornerShape(14.dp)
                                 ),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(
-                                            Brush.horizontalGradient(
-                                                colors = listOf(
-                                                    Color(0xFFFFFFFF),
-                                                    Color(0xFFFFF6E6)
-                                                )
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            colors = listOf(
+                                                Color(0xFFFFFFFF),
+                                                Color(0xFFFFF7EB)
                                             )
-                                        ),
-                                    contentAlignment = Alignment.Center
+                                        )
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center,
-                                        modifier = Modifier.padding(horizontal = 16.dp)
-                                    ) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.ic_google),
-                                            contentDescription = "Google Logo",
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(12.dp))
-                                        Text(
-                                            text = if (isEnglish) "Continue with Google" else "गूगल के साथ जारी रखें",
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 15.sp,
-                                            color = Color.Black,
-                                            maxLines = 1
-                                        )
-                                    }
+                                    Image(
+                                        painter = painterResource(id = R.drawable.ic_google),
+                                        contentDescription = "Google Logo",
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        text = if (isEnglish) "Continue with Google" else "गूगल के साथ जारी रखें",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.5.sp,
+                                        color = Color.Black,
+                                        maxLines = 1
+                                    )
                                 }
                             }
                         }
-
-                        Spacer(modifier = Modifier.height(28.dp))
-
-                        // High Security Credentials Footer Badge
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color.White.copy(alpha = 0.05f))
-                                .border(BorderStroke(0.5.dp, SaffronPrimary.copy(alpha = 0.2f)), RoundedCornerShape(8.dp))
-                                .padding(horizontal = 14.dp, vertical = 6.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Secure authentication",
-                                tint = GoldAccent,
-                                modifier = Modifier.size(13.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "Firebase Core Secure Authentication",
-                                color = Color.White.copy(alpha = 0.55f),
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.5.sp
-                            )
-                        }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                // Premium Custom Styled Close Button
-                TextButton(
-                    onClick = onBackClick,
-                    shape = RoundedCornerShape(24.dp),
-                    border = BorderStroke(1.dp, Brush.linearGradient(listOf(GoldAccent.copy(alpha = glowOpacity), SaffronPrimary.copy(alpha = glowOpacity)))),
-                    colors = ButtonDefaults.textButtonColors(containerColor = Color.Black.copy(alpha = 0.3f)),
-                    modifier = Modifier.height(44.dp)
-                ) {
+                    // Secure Authentication Badge
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .border(BorderStroke(0.5.dp, SaffronPrimary.copy(alpha = 0.15f)), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 12.dp, vertical = 5.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = "Secure Key",
                             tint = GoldAccent,
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier.size(11.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = if (isEnglish) "Back to Home" else "मुख्य पृष्ठ पर वापस जाएँ",
-                            color = Color.White.copy(alpha = 0.95f),
-                            fontSize = 14.sp,
+                            text = "Firebase Core Secure Login",
+                            color = Color.White.copy(alpha = 0.5f),
+                            fontSize = 9.5.sp,
                             fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Serif
+                            letterSpacing = 0.5.sp
                         )
                     }
+                }
+            }
+
+            // Bottom Section: Back Button
+            TextButton(
+                onClick = onBackClick,
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(1.dp, Brush.linearGradient(listOf(GoldAccent.copy(alpha = glowOpacity), SaffronPrimary.copy(alpha = glowOpacity)))),
+                colors = ButtonDefaults.textButtonColors(containerColor = Color.Black.copy(alpha = 0.2f)),
+                modifier = Modifier
+                    .height(40.dp)
+                    .padding(bottom = 8.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        tint = GoldAccent,
+                        modifier = Modifier.size(12.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = if (isEnglish) "Back to Home" else "मुख्य पृष्ठ पर वापस जाएँ",
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif
+                    )
                 }
             }
         }

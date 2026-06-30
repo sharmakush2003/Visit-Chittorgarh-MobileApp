@@ -151,19 +151,19 @@ fun wmoToDescHi(code: Int): String = when (code) {
     else         -> "अज्ञात"
 }
 
-// Dynamic sky gradient based on time and weather
+// Dynamic sky gradient based on time and weather - elegant dark-royal themes
 fun skyGradient(code: Int, hourOfDay: Int): List<Color> {
     val isNight = hourOfDay < 6 || hourOfDay >= 19
     val isDusk = hourOfDay in 17..18
     val isDawn = hourOfDay in 5..7
     return when {
-        code >= 95 -> listOf(Color(0xFF0D0D1A), Color(0xFF1A1030), Color(0xFF2C1654))
-        code in 45..82 && isNight -> listOf(Color(0xFF0F1923), Color(0xFF1A2A3A))
-        code in 45..82 -> listOf(Color(0xFF2C3E50), Color(0xFF3D5265), Color(0xFF4A6680))
-        isNight -> listOf(Color(0xFF050A1A), Color(0xFF0D1B4A), Color(0xFF162461))
-        isDusk -> listOf(Color(0xFF1A0A2E), Color(0xFF8B3A62), Color(0xFFE8824A), Color(0xFFF5C843))
-        isDawn -> listOf(Color(0xFF0D1B4A), Color(0xFF7B4FA6), Color(0xFFE8824A), Color(0xFFFFF176))
-        else -> listOf(Color(0xFF1565C0), Color(0xFF1976D2), Color(0xFF42A5F5), Color(0xFF81D4FA))
+        code >= 95 -> listOf(Color(0xFF07070F), Color(0xFF140D26), Color(0xFF22113A))
+        code in 45..82 && isNight -> listOf(Color(0xFF0A0F14), Color(0xFF131E2A))
+        code in 45..82 -> listOf(Color(0xFF1F2C39), Color(0xFF2E3E4F))
+        isNight -> listOf(Color(0xFF030712), Color(0xFF091124), Color(0xFF0F1E3D))
+        isDusk -> listOf(Color(0xFF120720), Color(0xFF401633), Color(0xFF6E2833), Color(0xFF904F2F))
+        isDawn -> listOf(Color(0xFF091124), Color(0xFF3B2352), Color(0xFF753B3C), Color(0xFF9E7036))
+        else -> listOf(Color(0xFF091524), Color(0xFF0F253F), Color(0xFF1A3B60), Color(0xFF2A5380))
     }
 }
 
@@ -367,7 +367,14 @@ fun WeatherScreen(
             .fillMaxSize()
             .background(Brush.verticalGradient(gradient))
     ) {
-        // Top bar
+        // Content list is rendered first, so it is in the background
+        when {
+            isLoading -> LoadingState(loadPulse, isEnglish)
+            hasError  -> ErrorState(isEnglish) { refreshTrigger++ }
+            weather != null -> WeatherContent(weather!!, isEnglish, hourOfDay)
+        }
+
+        // Top bar is rendered last, so it stays on top of the hierarchy and intercepts touches properly
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -396,12 +403,6 @@ fun WeatherScreen(
                     modifier = if (isLoading) Modifier.rotate(spinDeg) else Modifier
                 )
             }
-        }
-
-        when {
-            isLoading -> LoadingState(loadPulse, isEnglish)
-            hasError  -> ErrorState(isEnglish) { refreshTrigger++ }
-            weather != null -> WeatherContent(weather!!, isEnglish, hourOfDay)
         }
     }
 }
@@ -708,32 +709,75 @@ private fun DailyRow(day: DailyItem, isEnglish: Boolean, globalMin: Double, glob
         Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(day.dayLabel, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(90.dp))
-        Text(wmoToEmoji(day.weatherCode), fontSize = 20.sp)
-        Spacer(Modifier.width(8.dp))
-        if (day.precipSum > 0.1) {
-            Text("💧${"%.0f".format(day.precipSum)}mm", color = Color(0xFF64B5F6), fontSize = 10.sp, modifier = Modifier.width(46.dp))
-        } else {
-            Spacer(Modifier.width(46.dp))
+        // Narrower day label with responsive text size
+        Text(
+            text = day.dayLabel,
+            color = Color.White,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.width(75.dp)
+        )
+        
+        // Stack weather icon and precipitation to eliminate the horizontal gap column entirely
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.width(42.dp)
+        ) {
+            Text(wmoToEmoji(day.weatherCode), fontSize = 18.sp)
+            if (day.precipSum > 0.1) {
+                Text(
+                    text = "${"%.0f".format(day.precipSum)}mm",
+                    color = Color(0xFF64B5F6),
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
-        Spacer(Modifier.weight(1f))
-        Text("${day.minTemp.toInt()}°", color = Color.White.copy(alpha = 0.55f), fontSize = 13.sp, modifier = Modifier.width(28.dp), textAlign = TextAlign.End)
+        
+        Spacer(Modifier.width(8.dp))
+        
+        // Minimum temperature
+        Text(
+            text = "${day.minTemp.toInt()}°",
+            color = Color.White.copy(alpha = 0.55f),
+            fontSize = 13.sp,
+            modifier = Modifier.width(26.dp),
+            textAlign = TextAlign.End
+        )
+        
         Spacer(Modifier.width(6.dp))
-        // Temperature bar
+        
+        // Temperature bar scales dynamically to fill all available width
         val range = (globalMax - globalMin).let { if (it == 0.0) 1.0 else it }
         val barStart = ((day.minTemp - globalMin) / range).toFloat()
         val barEnd   = ((day.maxTemp - globalMin) / range).toFloat()
-        Canvas(modifier = Modifier.width(70.dp).height(5.dp)) {
-            drawLine(Color.White.copy(alpha = 0.25f), Offset(0f, size.height / 2), Offset(size.width, size.height / 2), 5.dp.toPx(), StrokeCap.Round)
+        Canvas(modifier = Modifier.weight(1f).height(4.dp)) {
+            drawLine(
+                Color.White.copy(alpha = 0.15f),
+                Offset(0f, size.height / 2),
+                Offset(size.width, size.height / 2),
+                4.dp.toPx(),
+                StrokeCap.Round
+            )
             drawLine(
                 Brush.linearGradient(listOf(Color(0xFF64B5F6), SaffronPrimary, Color(0xFFE53935))),
                 Offset(barStart * size.width, size.height / 2),
                 Offset(barEnd * size.width, size.height / 2),
-                5.dp.toPx(), StrokeCap.Round
+                4.dp.toPx(),
+                StrokeCap.Round
             )
         }
+        
         Spacer(Modifier.width(6.dp))
-        Text("${day.maxTemp.toInt()}°", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(28.dp))
+        
+        // Maximum temperature
+        Text(
+            text = "${day.maxTemp.toInt()}°",
+            color = Color.White,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.width(26.dp)
+        )
     }
 }
 
@@ -909,14 +953,14 @@ private fun TouristAdvisoryCard(w: WeatherData, isEnglish: Boolean) {
 @Composable
 private fun GlassCard(
     modifier: Modifier = Modifier,
-    tint: Color = Color.White.copy(alpha = 0.10f),
+    tint: Color = Color.Black.copy(alpha = 0.35f),
     content: @Composable ColumnScope.() -> Unit
 ) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
             .background(tint)
-            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(20.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
     ) {
         Column(modifier = Modifier.padding(16.dp), content = content)
     }

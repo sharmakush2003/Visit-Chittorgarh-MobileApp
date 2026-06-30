@@ -48,7 +48,7 @@ fun HomeScreen(
     var selectedAttraction by remember { mutableStateOf<Attraction?>(null) }
 
     // Track whether data has ever arrived (distinguishes "loading" from "empty result")
-    var dataEverLoaded by remember { mutableStateOf(false) }
+    var dataEverLoaded by remember(attractions) { mutableStateOf(attractions.isNotEmpty()) }
     LaunchedEffect(attractions) {
         if (attractions.isNotEmpty()) dataEverLoaded = true
     }

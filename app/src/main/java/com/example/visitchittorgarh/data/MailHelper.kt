@@ -93,11 +93,6 @@ object MailHelper {
                                     <p style="color: #4a5568; line-height: 1.6; font-size: 15px;">
                                         With the app, you can easily generate royal travel passes, plan itineraries, discover sightseeing spots, and hire certified local guides to make your journey unforgettable.
                                     </p>
-
-                                    <!-- Button -->
-                                    <div style="text-align: center; margin-top: 35px;">
-                                        <a href="https://www.visitchittorgarh.in" target="_blank" style="background-color: #1A365D; color: #D4AF37; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; border: 2px solid #D4AF37; display: inline-block; box-shadow: 0 4px 6px rgba(26,54,93,0.2);">EXPLORE CHITTORGARH</a>
-                                    </div>
                                 </td>
                             </tr>
 

@@ -138,4 +138,7 @@ dependencies {
 
   // Lottie for Compose - Rich vector animations
   implementation("com.airbnb.android:lottie-compose:6.4.1")
+
+  // Location services - GPS for SOS feature
+  implementation("com.google.android.gms:play-services-location:21.3.0")
 }

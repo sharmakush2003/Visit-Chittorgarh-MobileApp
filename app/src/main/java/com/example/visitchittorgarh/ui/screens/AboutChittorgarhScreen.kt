@@ -55,7 +55,7 @@ fun AboutChittorgarhScreen(
             nameHi = "चित्तौड़गढ़ किला",
             descEn = "The largest fort in India, standing on a 180m hill. It is the core center of Rajput pride, featuring seven majestic gates and royal palaces.",
             descHi = "180 मीटर ऊँची पहाड़ी पर स्थित भारत का सबसे बड़ा किला। यह राजपूत गौरव का मुख्य केंद्र है, जिसमें सात राजसी द्वार और शाही महल बने हैं।",
-            image = "https://www.visitchittorgarh.in/assets/images/Chittorgarh%20Fort.webp"
+            image = "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=800&auto=format&fit=crop"
         ),
         TouristPlace(
             nameEn = "Vijay Stambh (Tower of Victory)",
@@ -69,28 +69,28 @@ fun AboutChittorgarhScreen(
             nameHi = "कीर्ति स्तम्भ",
             descEn = "A 12th-century tower built by a Jain merchant, dedicated to Adinath, the first Jain Tirthankara. Beautifully carved with Digambara figures.",
             descHi = "एक जैन व्यापारी द्वारा निर्मित 12वीं सदी का स्तंभ, जो पहले जैन तीर्थंकर आदिनाथ को समर्पित है। दिगंबर आकृतियों से सुंदर नक्काशी की गई है।",
-            image = "https://www.visitchittorgarh.in/assets/images/Kirti%20Stambh.jpg"
+            image = "https://images.unsplash.com/photo-1603258591326-e14541824a8e?w=800&auto=format&fit=crop"
         ),
         TouristPlace(
             nameEn = "Padmini Palace",
             nameHi = "पद्मिनी महल",
             descEn = "The royal palace of Queen Padmini, located near the water body where Delhi Sultan Alauddin Khilji was allowed a glimpse of the queen's reflection.",
             descHi = "रानी पद्मिनी का शाही महल, जो जलाशय के पास स्थित है जहाँ दिल्ली के सुल्तान अलाउद्दीन खिलजी को रानी के प्रतिबिंब की झलक देखने की अनुमति दी गई थी।",
-            image = "https://www.visitchittorgarh.in/assets/images/Padmini%20Palace.jpg"
+            image = "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&auto=format&fit=crop"
         ),
         TouristPlace(
             nameEn = "Rana Kumbha Palace",
             nameHi = "राणा कुम्भा महल",
             descEn = "The ruined palace of Maharana Kumbha, featuring beautiful Mewari architecture. It is also the historic site where Jauhar took place.",
             descHi = "महाराणा कुंभा का खंडहर महल, जिसमें सुंदर मेवाड़ी वास्तुकला है। यह वही ऐतिहासिक स्थल भी है जहाँ जौहर की रस्म हुई थी।",
-            image = "https://www.visitchittorgarh.in/assets/images/Rana-Kumbha-Palace.jpg"
+            image = "https://images.unsplash.com/photo-1600703136783-bdd5ee2a252f?w=800&auto=format&fit=crop"
         ),
         TouristPlace(
             nameEn = "Gaumukh Reservoir",
             nameHi = "गौमुख कुंड",
             descEn = "A deep sacred pool fed by a natural spring flowing from a rock shaped like a cow's mouth. A tranquil spiritual site inside the fort.",
             descHi = "एक गहरा पवित्र कुंड जो गाय के मुंह के आकार की चट्टान से बहने वाले प्राकृतिक झरने से भरा रहता है। किले के अंदर एक शांत आध्यात्मिक स्थल।",
-            image = "https://www.visitchittorgarh.in/assets/images/Gaumukh-Kund-Chittorgarh.jpg"
+            image = "https://images.unsplash.com/photo-1545128485-c400e7702796?w=800&auto=format&fit=crop"
         ),
         TouristPlace(
             nameEn = "Sanwariaji Temple",
@@ -104,7 +104,7 @@ fun AboutChittorgarhScreen(
             nameHi = "मीरा मंदिर",
             descEn = "Built by Rana Kumbha, this temple is dedicated to the saint-poetess Meera Bai and her pure devotion to Lord Krishna. Features a small shrine of Saint Ravidas.",
             descHi = "महाराणा कुंभा द्वारा निर्मित, यह मंदिर संत-कवयित्री मीरा बाई और भगवान कृष्ण के प्रति उनकी शुद्ध भक्ति को समर्पित है। इसमें संत रविदास का एक छोटा मंदिर है।",
-            image = "https://www.visitchittorgarh.in/assets/images/Meera-Temple-Chittorgarh.jpg"
+            image = "https://images.unsplash.com/photo-1602643163983-ed0babc39797?w=800&auto=format&fit=crop"
         ),
         TouristPlace(
             nameEn = "Matrikundia Temple",
@@ -118,7 +118,7 @@ fun AboutChittorgarhScreen(
             nameHi = "मेनाल जलप्रपात और मंदिर",
             descEn = "A scenic 150-feet waterfall dropping into a deep gorge, surrounded by ancient 11th-century temples resembling the Khajuraho art style.",
             descHi = "एक गहरी घाटी में गिरने वाला 150 फीट का मनोरम जलप्रपात, जो खजुराहो कला शैली से मिलते-जुलते प्राचीन 11वीं सदी के मंदिरों से घिरा हुआ है।",
-            image = "https://www.visitchittorgarh.in/assets/images/Menal-Waterfall-Chittorgarh.jpg"
+            image = "https://images.unsplash.com/photo-1508496404318-d419e9bc339c?w=800&auto=format&fit=crop"
         )
     )
 
@@ -337,9 +337,9 @@ fun AboutChittorgarhScreen(
                                      lineHeight = 18.sp,
                                      color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                                  )
-                                 Spacer(modifier = Modifier.height(8.dp))
+                                 Spacer(modifier = Modifier.height(12.dp))
                                  val context = LocalContext.current
-                                 TextButton(
+                                 OutlinedButton(
                                      onClick = {
                                          val destinationName = "${place.nameEn}, Chittorgarh, Rajasthan"
                                          val intent = android.content.Intent(
@@ -348,8 +348,12 @@ fun AboutChittorgarhScreen(
                                          )
                                          context.startActivity(intent)
                                      },
-                                     contentPadding = PaddingValues(0.dp),
-                                     colors = ButtonDefaults.textButtonColors(contentColor = SaffronPrimary)
+                                     modifier = Modifier
+                                         .fillMaxWidth()
+                                         .height(40.dp),
+                                     shape = RoundedCornerShape(8.dp),
+                                     border = BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.8f)),
+                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = SaffronPrimary)
                                  ) {
                                      Icon(
                                          imageVector = Icons.Default.LocationOn,
@@ -357,11 +361,12 @@ fun AboutChittorgarhScreen(
                                          tint = SaffronPrimary,
                                          modifier = Modifier.size(16.dp)
                                      )
-                                     Spacer(modifier = Modifier.width(4.dp))
+                                     Spacer(modifier = Modifier.width(6.dp))
                                      Text(
                                          text = if (isEnglish) "Get Directions" else "दिशा-निर्देश प्राप्त करें",
                                          fontWeight = FontWeight.Bold,
-                                         fontSize = 13.sp
+                                         fontSize = 13.sp,
+                                         fontFamily = FontFamily.Serif
                                      )
                                  }
                              }

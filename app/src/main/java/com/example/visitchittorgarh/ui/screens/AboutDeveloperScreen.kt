@@ -17,6 +17,8 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -48,7 +50,7 @@ fun AboutDeveloperScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = if (isEnglish) "Our Mission & Team" else "हमारा उद्देश्य और टीम",
+                        text = if (isEnglish) "About the Developers" else "विकासकर्ताओं के बारे में",
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Serif,
                         fontSize = 20.sp,
@@ -71,7 +73,7 @@ fun AboutDeveloperScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Premium Royal Header
+            // ChittorTech Logo & Subtitle Banner
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -81,7 +83,7 @@ fun AboutDeveloperScreen(
                         )
                     )
                     .border(BorderStroke(0.5.dp, GoldAccent.copy(alpha = 0.3f)))
-                    .padding(vertical = 40.dp, horizontal = 24.dp)
+                    .padding(vertical = 32.dp, horizontal = 24.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                     Box(
@@ -93,14 +95,14 @@ fun AboutDeveloperScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "👑",
+                            text = "🚀",
                             fontSize = 36.sp,
                             textAlign = TextAlign.Center
                         )
                     }
                     Spacer(modifier = Modifier.height(14.dp))
                     Text(
-                        text = if (isEnglish) "ChittorTech Solutions" else "चित्तौड़टेक सॉल्यूशंस",
+                        text = "ChittorTech Solutions",
                         color = GoldAccent,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
@@ -109,9 +111,9 @@ fun AboutDeveloperScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = if (isEnglish) "Digital Tourism & Local Empowerment" else "डिजिटल पर्यटन और स्थानीय सशक्तिकरण",
+                        text = if (isEnglish) "Best IT Startup in Chittorgarh" else "चित्तौड़गढ़ का सर्वश्रेष्ठ आईटी स्टार्टअप",
                         color = Color.White.copy(alpha = 0.8f),
-                        fontSize = 12.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Medium,
                         fontFamily = FontFamily.SansSerif,
                         textAlign = TextAlign.Center
@@ -120,144 +122,214 @@ fun AboutDeveloperScreen(
             }
 
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // App Motive / Mission Card
+                // Intro Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = null,
-                                tint = SaffronPrimary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = if (isEnglish) "OUR MISSION" else "हमारा संकल्प",
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Serif,
-                                fontSize = 14.sp,
-                                color = SaffronPrimary,
-                                letterSpacing = 1.sp
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(10.dp))
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = if (isEnglish) {
-                                "Visit Chittorgarh is built to bring Mewar's historic legacy to digital forefront. Our app acts as a single-window travel assistant, digitizing tour booking while supporting local businesses, guides, and taxi operators directly without middleman commissions."
+                                "ChittorTech is a leading IT company and web development agency based in Chittorgarh, Rajasthan. We engineer premium websites, SaaS enterprise applications, custom AI Chatbots (RAG), and high-performance native mobile apps built on Expo and Kotlin."
                             } else {
-                                "विजिट चित्तौड़गढ़ को मेवाड़ की ऐतिहासिक विरासत को डिजिटल रूप से सशक्त बनाने के लिए बनाया गया है। यह ऐप यात्रा बुकिंग को आसान बनाता है और सीधे स्थानीय व्यवसायों, गाइडों और टैक्सी चालकों की मदद करता है।"
+                                "चित्तौड़टेक चित्तौड़गढ़, राजस्थान में स्थित एक प्रमुख आईटी कंपनी और वेब डेवलपमेंट एजेंसी है। हम प्रीमियम वेबसाइट्स, एंटरप्राइज सॉफ्टवेयर (SaaS), कस्टम AI चैटबॉट्स और फ्लूइड मोबाइल ऐप्स बनाते हैं।"
                             },
                             fontSize = 14.sp,
                             lineHeight = 20.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                         )
                     }
                 }
 
-                // About Company Card
-                Card(
+                // iStart & Startup India Badges
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = null,
-                                tint = CrimsonSecondary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
+                    Card(
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        border = BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.3f))
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
                             Text(
-                                text = if (isEnglish) "ABOUT CHITTORTECH" else "चित्तौड़टेक के बारे में",
+                                text = "iStart Rajasthan",
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Serif,
-                                fontSize = 14.sp,
-                                color = CrimsonSecondary,
-                                letterSpacing = 1.sp
+                                color = SaffronPrimary,
+                                fontSize = 12.sp
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Bronze Card Rating\nStartup ID: 05F896CE",
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                         }
-                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+
+                    Card(
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        border = BorderStroke(1.dp, CrimsonSecondary.copy(alpha = 0.3f))
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = "Startup India",
+                                fontWeight = FontWeight.Bold,
+                                color = CrimsonSecondary,
+                                fontSize = 12.sp
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "DPIIT Recognized\nBhaskar ID: IN-0426-9449SG",
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                }
+
+                // Section: Team Leadership
+                Text(
+                    text = if (isEnglish) "Meet the Founders" else "संस्थापक टीम",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily.Serif,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+                // Kush Profile
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Person, contentDescription = null, tint = SaffronPrimary)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                Text("Kush Sharma", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                                Text(if (isEnglish) "Founder & Software Engineer" else "संस्थापक और सॉफ्टवेयर इंजीनियर", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = if (isEnglish) {
-                                "Based in the historic city of Chittorgarh, ChittorTech is a local technology startup specializing in digital platforms, travel-tech, and regional software solutions. We are registered under MSME (Government of India) and officially recognized under the iStart Rajasthan Startup program by the Government of Rajasthan."
+                                "A software engineer and GenAI specialist, B.Tech IT graduate from JECRC Foundation (8.90 CGPA). Expert in Generative AI, LangChain, Node.js, and MongoDB. Built complex RAG systems and digital tourism structures."
                             } else {
-                                "चित्तौड़गढ़ के ऐतिहासिक शहर में स्थित, चित्तौड़टेक एक स्थानीय प्रौद्योगिकी स्टार्टअप है जो डिजिटल प्लेटफॉर्म, ट्रैवल-टेक और सॉफ़्टवेयर समाधानों में माहिर है। हम MSME (भारत सरकार) के तहत पंजीकृत हैं और राजस्थान सरकार के iStart कार्यक्रम के तहत मान्यता प्राप्त हैं।"
+                                "एक सॉफ्टवेयर इंजीनियर और GenAI विशेषज्ञ, JECRC फाउंडेशन (8.90 CGPA) से बी.टेक आईटी स्नातक। जेनेरेटिव एआई, LangChain, नोड.जेएस और मोंगोडीबी के विशेषज्ञ।"
                             },
-                            fontSize = 13.sp,
-                            lineHeight = 19.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                            fontSize = 12.sp,
+                            lineHeight = 18.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
                 }
 
-                // Team Values Card
+                // Lav Profile
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Person, contentDescription = null, tint = CrimsonSecondary)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                Text("Lav Sharma", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                                Text(if (isEnglish) "Co-Founder & Lead AI Developer" else "सह-संस्थापक और मुख्य एआई डेवलपर", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = if (isEnglish) {
+                                "Co-founder and lead AI Full-Stack Developer, B.Tech IT graduate from JECRC Foundation (8.52 CGPA). Specializes in complete web/SaaS architecture, Express.js, Node.js, and high-performance databases."
+                            } else {
+                                "सह-संस्थापक और मुख्य एआई फुल-स्टैक डेवलपर, JECRC फाउंडेशन (8.52 CGPA) से बी.टेक आईटी स्नातक। वेब/SaaS आर्किटेक्चर, नोड.जेएस और मोंगोडीबी के विशेषज्ञ।"
+                            },
+                            fontSize = 12.sp,
+                            lineHeight = 18.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+
+                // Section: Projects
+                Text(
+                    text = if (isEnglish) "Our Projects" else "हमारे प्रोजेक्ट्स",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily.Serif,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+                // Project List
+                val projects = listOf(
+                    Triple("Visit Chittorgarh App", "Tourism Travel-Tech platform with native pass bookings & direct local vendor connection.", "Active"),
+                    Triple("Mewari Achaar App", "Mobile E-Commerce system facilitating native ordering of local Mewari pickles.", "Active"),
+                    Triple("Digify Gift Shop Portal", "Enterprise multi-vendor e-commerce platform and CRM architecture.", "Active")
+                )
+
+                projects.forEach { proj ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(proj.first, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                Text(proj.second, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Badge(containerColor = SaffronPrimary.copy(alpha = 0.2f), contentColor = SaffronPrimary) {
+                                Text(proj.third, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                            }
+                        }
+                    }
+                }
+
+                // helplines
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text(
-                            text = if (isEnglish) "OUR TEAM & VALUES" else "हमारी टीम और मूल्य",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = SaffronPrimary,
-                            letterSpacing = 1.sp
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            text = if (isEnglish) {
-                                "We believe in transparency, premium guest hospitality (Atithi Devo Bhava), and local community growth. Our engineering team works closely with Mewar's heritage authorities and local unions to ensure authentic and reliable travel concierge services."
-                            } else {
-                                "हम पारदर्शिता, अतिथि देवो भवः की भावना और स्थानीय समुदाय के विकास में विश्वास करते हैं। हमारी टीम प्रामाणिक और विश्वसनीय सेवाएं सुनिश्चित करने के लिए स्थानीय अधिकारियों और संघों के साथ मिलकर काम करती है।"
-                            },
-                            fontSize = 13.sp,
-                            lineHeight = 19.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
-                    }
-                }
-
-                // Helplines & Direct Actions Card (Re-designed visually premium)
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
                     border = BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.25f)),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f))
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f))
                 ) {
                     Column(
-                        modifier = Modifier.padding(20.dp),
+                        modifier = Modifier.padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = if (isEnglish) "DIGITAL PORTAL HELPDESK" else "डिजिटल पोर्टल हेल्पडेस्क",
+                            text = if (isEnglish) "CHITTORTECH HELPDESK" else "चित्तौड़टेक हेल्पडेस्क",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = CrimsonSecondary,
                             fontFamily = FontFamily.Serif,
-                            letterSpacing = 1.2.sp
+                            letterSpacing = 1.sp
                         )
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = if (isEnglish) "Direct lines for guest assistance & verification queries" else "अतिथि सहायता और सत्यापन प्रश्नों के लिए सीधी लाइनें",
-                            fontSize = 11.sp,
+                            text = if (isEnglish) "Direct lines for support and project queries" else "सपोर्ट और नए प्रोजेक्ट के प्रश्नों के लिए सीधी लाइनें",
+                            fontSize = 10.sp,
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         // WhatsApp Chat Button
                         Button(
@@ -271,25 +343,24 @@ fun AboutDeveloperScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(46.dp),
-                            shape = RoundedCornerShape(12.dp),
+                                .height(44.dp),
+                            shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366))
                         ) {
                             Text(
-                                text = if (isEnglish) "Inquire on WhatsApp Support" else "व्हाट्सएप सपोर्ट पर संपर्क करें",
+                                text = if (isEnglish) "Contact WhatsApp Support" else "व्हाट्सएप सपोर्ट पर संपर्क करें",
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Serif,
-                                fontSize = 14.sp,
+                                fontSize = 13.sp,
                                 color = Color.White
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         // Call & Email Row
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             OutlinedButton(
                                 onClick = {
@@ -298,14 +369,14 @@ fun AboutDeveloperScreen(
                                 },
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(46.dp),
-                                shape = RoundedCornerShape(12.dp),
+                                    .height(44.dp),
+                                shape = RoundedCornerShape(10.dp),
                                 border = BorderStroke(1.dp, CrimsonSecondary),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = CrimsonSecondary)
                             ) {
                                 Icon(Icons.Default.Call, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(text = if (isEnglish) "Call Desk" else "कॉल डेस्क", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = if (isEnglish) "Call" else "कॉल", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                             }
 
                             OutlinedButton(
@@ -318,20 +389,20 @@ fun AboutDeveloperScreen(
                                 },
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(46.dp),
-                                shape = RoundedCornerShape(12.dp),
+                                    .height(44.dp),
+                                shape = RoundedCornerShape(10.dp),
                                 border = BorderStroke(1.dp, SaffronPrimary),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = SaffronPrimary)
                             ) {
                                 Icon(Icons.Default.Email, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(text = if (isEnglish) "Email Us" else "ईमेल करें", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = if (isEnglish) "Email" else "ईमेल", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 // Close Button
                 Button(
@@ -339,7 +410,7 @@ fun AboutDeveloperScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = CrimsonSecondary),
                     border = BorderStroke(1.dp, GoldAccent.copy(alpha = 0.3f))
                 ) {

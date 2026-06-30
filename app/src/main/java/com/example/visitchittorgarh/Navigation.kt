@@ -22,9 +22,11 @@ import com.example.visitchittorgarh.ui.screens.AuthScreen
 
 @Composable
 fun MainNavigation() {
-  val backStack = rememberNavBackStack(Splash)
   val context = LocalContext.current
   val sharedPrefs = remember { context.getSharedPreferences("chittorgarh_prefs", Context.MODE_PRIVATE) }
+  val isFirstLaunch = remember { sharedPrefs.getBoolean("is_first_launch", true) }
+  val startDestination = if (isFirstLaunch) Splash else Main
+  val backStack = rememberNavBackStack(startDestination)
 
   // Sync user passes with Firestore on login state change
   LaunchedEffect(key1 = true) {
@@ -46,6 +48,7 @@ fun MainNavigation() {
         entry<Splash> {
           SplashScreen(
             onSplashFinished = {
+              sharedPrefs.edit().putBoolean("is_first_launch", false).apply()
               backStack.add(Main)
               backStack.remove(Splash)
             }

@@ -42,7 +42,9 @@ fun PartnerPortalScreen(
 ) {
     val context = LocalContext.current
     var isUnlocked by remember { mutableStateOf(false) }
-    var pinInput by remember { mutableStateOf("") }
+    var emailInput by remember { mutableStateOf("") }
+    var passwordInput by remember { mutableStateOf("") }
+    var isAuthLoading by remember { mutableStateOf(false) }
     var passCodeQuery by remember { mutableStateOf("") }
     var activePass by remember { mutableStateOf<TravelPass?>(null) }
 
@@ -82,7 +84,7 @@ fun PartnerPortalScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             if (!isUnlocked) {
-                // PIN Lock screen
+                // Partner Authentication Screen
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -107,7 +109,7 @@ fun PartnerPortalScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
-                        text = if (isEnglish) "Verification PIN Required" else "सत्यापन पिन आवश्यक है",
+                        text = if (isEnglish) "Partner Authentication" else "साझेदार प्रमाणीकरण",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         fontFamily = FontFamily.Serif
@@ -116,7 +118,7 @@ fun PartnerPortalScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = if (isEnglish) "Enter the 4-digit partner PIN to proceed" else "आगे बढ़ने के लिए 4-अंकीय साझेदार पिन दर्ज करें",
+                        text = if (isEnglish) "Sign in with partner credentials to proceed" else "आगे बढ़ने के लिए साझेदार क्रेडेंशियल्स के साथ साइन इन करें",
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
@@ -124,36 +126,60 @@ fun PartnerPortalScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     OutlinedTextField(
-                        value = pinInput,
-                        onValueChange = {
-                            if (it.length <= 4) pinInput = it
-                        },
-                        label = { Text(if (isEnglish) "Security PIN" else "सुरक्षा पिन") },
+                        value = emailInput,
+                        onValueChange = { emailInput = it },
+                        label = { Text(if (isEnglish) "Partner Email" else "साझेदार ईमेल") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedTextField(
+                        value = passwordInput,
+                        onValueChange = { passwordInput = it },
+                        label = { Text(if (isEnglish) "Password" else "पासवर्ड") },
                         visualTransformation = PasswordVisualTransformation(),
                         singleLine = true,
-                        modifier = Modifier.width(200.dp),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                         shape = RoundedCornerShape(12.dp)
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    Button(
-                        onClick = {
-                            if (pinInput == "1234") {
-                                isUnlocked = true
-                            } else {
-                                Toast.makeText(context, "Incorrect PIN. Try again.", Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        modifier = Modifier.width(200.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = CrimsonSecondary)
-                    ) {
-                        Text(
-                            text = if (isEnglish) "Unlock Panel" else "पैनल अनलॉक करें",
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Serif
-                        )
+                    if (isAuthLoading) {
+                        CircularProgressIndicator(color = SaffronPrimary)
+                    } else {
+                        Button(
+                            onClick = {
+                                if (emailInput.isBlank() || passwordInput.isBlank()) {
+                                    Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                                    return@Button
+                                }
+                                isAuthLoading = true
+                                com.google.firebase.auth.FirebaseAuth.getInstance()
+                                    .signInWithEmailAndPassword(emailInput.trim(), passwordInput)
+                                    .addOnCompleteListener { task ->
+                                        isAuthLoading = false
+                                        if (task.isSuccessful) {
+                                            isUnlocked = true
+                                            Toast.makeText(context, "Authorized successfully", Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            Toast.makeText(context, "Authentication Failed: ${task.exception?.localizedMessage}", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                            },
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = CrimsonSecondary)
+                        ) {
+                            Text(
+                                text = if (isEnglish) "Login as Partner" else "साझेदार के रूप में लॉगिन करें",
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Serif
+                            )
+                        }
                     }
                 }
             } else {
@@ -190,17 +216,18 @@ fun PartnerPortalScreen(
 
                         Button(
                             onClick = {
-                                val pass = BookingManager.getPass(passCodeQuery)
-                                if (pass != null) {
-                                    activePass = pass
-                                    driverName = pass.driverName
-                                    guideName = pass.guideName
-                                    paymentStatus = pass.paymentStatus
-                                    redeemedTaxi = pass.redeemed_taxi
-                                    redeemedHotel = pass.redeemed_hotel
-                                    redeemedGuide = pass.redeemed_guide
-                                } else {
-                                    Toast.makeText(context, "No pass found for this code.", Toast.LENGTH_SHORT).show()
+                                BookingManager.getPass(passCodeQuery) { pass ->
+                                    if (pass != null) {
+                                        activePass = pass
+                                        driverName = pass.driverName
+                                        guideName = pass.guideName
+                                        paymentStatus = pass.paymentStatus
+                                        redeemedTaxi = pass.redeemed_taxi
+                                        redeemedHotel = pass.redeemed_hotel
+                                        redeemedGuide = pass.redeemed_guide
+                                    } else {
+                                        Toast.makeText(context, "No pass found for this code.", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
                             },
                             shape = RoundedCornerShape(12.dp),
@@ -545,9 +572,12 @@ fun PartnerPortalScreen(
                                             redeemed_hotel = redeemedHotel,
                                             redeemed_guide = redeemedGuide
                                         )
-                                        BookingManager.updatePass(updated)
-                                        activePass = updated
-                                        Toast.makeText(context, "Pass details updated successfully!", Toast.LENGTH_SHORT).show()
+                                        BookingManager.updatePass(updated, onSuccess = {
+                                            activePass = updated
+                                            Toast.makeText(context, "Pass details updated successfully!", Toast.LENGTH_SHORT).show()
+                                        }, onFailure = {
+                                            Toast.makeText(context, "Update failed: ${it.localizedMessage}", Toast.LENGTH_LONG).show()
+                                        })
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(10.dp),

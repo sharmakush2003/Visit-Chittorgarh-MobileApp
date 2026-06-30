@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object Splash : NavKey
 @Serializable data object Main : NavKey
+@Serializable data object Auth : NavKey
 
 @Serializable data class BookingPass(
     val pillarTitle: String = "Custom Tour",

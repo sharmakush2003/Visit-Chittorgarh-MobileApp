@@ -454,6 +454,8 @@ fun BookingPassScreen(
                                     Toast.makeText(context, "Please fill in all traveler details.", Toast.LENGTH_SHORT).show()
                                 } else {
                                     // Generate Pass
+                                    val currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+                                    val uId = currentUser?.uid ?: ""
                                     val rCode = "CT" + Random.nextInt(1000, 9999).toString()
                                     val pass = TravelPass(
                                         passCode = rCode,
@@ -469,10 +471,14 @@ fun BookingPassScreen(
                                         hotelPrice = hotelPrice,
                                         guide = guide,
                                         guidePrice = guidePrice,
-                                        pillarTitle = initialPillarTitle
+                                        pillarTitle = initialPillarTitle,
+                                        userId = uId
                                     )
-                                    BookingManager.addPass(pass)
-                                    travelPass = pass
+                                    BookingManager.addPass(pass, onSuccess = {
+                                        travelPass = pass
+                                    }, onFailure = {
+                                        Toast.makeText(context, "Failed to save booking: ${it.localizedMessage}", Toast.LENGTH_LONG).show()
+                                    })
                                 }
                             }
                         },

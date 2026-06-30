@@ -17,11 +17,26 @@ import com.example.visitchittorgarh.ui.screens.AboutDeveloperScreen
 import com.example.visitchittorgarh.ui.screens.AboutChittorgarhScreen
 import com.example.visitchittorgarh.ui.screens.HowToReachScreen
 
+import androidx.compose.runtime.LaunchedEffect
+import com.example.visitchittorgarh.ui.screens.AuthScreen
+
 @Composable
 fun MainNavigation() {
   val backStack = rememberNavBackStack(Splash)
   val context = LocalContext.current
   val sharedPrefs = remember { context.getSharedPreferences("chittorgarh_prefs", Context.MODE_PRIVATE) }
+
+  // Sync user passes with Firestore on login state change
+  LaunchedEffect(key1 = true) {
+    com.google.firebase.auth.FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth ->
+      val currentUser = firebaseAuth.currentUser
+      if (currentUser != null) {
+        com.example.visitchittorgarh.data.BookingManager.listenToUserPasses(currentUser.uid)
+      } else {
+        com.example.visitchittorgarh.data.BookingManager.stopListening()
+      }
+    }
+  }
 
   NavDisplay(
     backStack = backStack,
@@ -40,17 +55,21 @@ fun MainNavigation() {
           MainScreen(
             modifier = Modifier.fillMaxSize(),
             onBookingPassClick = { title, transport, tPrice, hotel, hPrice, guide, gPrice ->
-              backStack.add(
-                BookingPass(
-                  pillarTitle = title,
-                  transport = transport,
-                  transportPrice = tPrice,
-                  hotel = hotel,
-                  hotelPrice = hPrice,
-                  guide = guide,
-                  guidePrice = gPrice
+              if (com.google.firebase.auth.FirebaseAuth.getInstance().currentUser == null) {
+                backStack.add(Auth)
+              } else {
+                backStack.add(
+                  BookingPass(
+                    pillarTitle = title,
+                    transport = transport,
+                    transportPrice = tPrice,
+                    hotel = hotel,
+                    hotelPrice = hPrice,
+                    guide = guide,
+                    guidePrice = gPrice
+                  )
                 )
-              )
+              }
             },
             onPartnerPortalClick = {
               backStack.add(PartnerPortal)
@@ -63,6 +82,21 @@ fun MainNavigation() {
             },
             onHowToReachClick = {
               backStack.add(HowToReach)
+            },
+            onAuthClick = {
+              backStack.add(Auth)
+            }
+          )
+        }
+        entry<Auth> {
+          val isEnglish = sharedPrefs.getBoolean("is_english", true)
+          AuthScreen(
+            isEnglish = isEnglish,
+            onAuthSuccess = {
+              backStack.removeLastOrNull()
+            },
+            onBackClick = {
+              backStack.removeLastOrNull()
             }
           )
         }

@@ -68,25 +68,26 @@ data class LocalItem(
 
 @Serializable
 data class TravelPass(
-    val passCode: String,
-    val name: String,
-    val email: String,
-    val phone: String,
-    val date: String,
-    val arrivalTime: String,
-    val departureTime: String,
-    val transport: String,
-    val transportPrice: Double,
-    val hotel: String,
-    val hotelPrice: Double,
-    val guide: String,
-    val guidePrice: Double,
+    val passCode: String = "",
+    val name: String = "",
+    val email: String = "",
+    val phone: String = "",
+    val date: String = "",
+    val arrivalTime: String = "",
+    val departureTime: String = "",
+    val transport: String = "",
+    val transportPrice: Double = 0.0,
+    val hotel: String = "",
+    val hotelPrice: Double = 0.0,
+    val guide: String = "",
+    val guidePrice: Double = 0.0,
     val pillarTitle: String = "Custom Tour",
     var guideName: String = "",
     var driverName: String = "",
     var paymentStatus: String = "Pending",
     var redeemed_taxi: Boolean = false,
     var redeemed_hotel: Boolean = false,
-    var redeemed_guide: Boolean = false
+    var redeemed_guide: Boolean = false,
+    val userId: String = ""
 )
 

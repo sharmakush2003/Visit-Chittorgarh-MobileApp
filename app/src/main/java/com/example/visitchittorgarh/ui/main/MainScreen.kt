@@ -1,6 +1,7 @@
 package com.example.visitchittorgarh.ui.main
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -39,6 +40,8 @@ import com.example.visitchittorgarh.theme.SaffronPrimary
 import com.example.visitchittorgarh.ui.screens.*
 import kotlinx.coroutines.launch
 
+import androidx.compose.material.icons.filled.Person
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
@@ -48,7 +51,8 @@ fun MainScreen(
     onPartnerPortalClick: () -> Unit,
     onAboutDeveloperClick: () -> Unit,
     onAboutChittorgarhClick: () -> Unit,
-    onHowToReachClick: () -> Unit
+    onHowToReachClick: () -> Unit,
+    onAuthClick: () -> Unit
 ) {
     val context = LocalContext.current
     val sharedPrefs = remember { context.getSharedPreferences("chittorgarh_prefs", Context.MODE_PRIVATE) }
@@ -68,6 +72,14 @@ fun MainScreen(
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    var currentUserState by remember { mutableStateOf(com.google.firebase.auth.FirebaseAuth.getInstance().currentUser) }
+
+    LaunchedEffect(key1 = true) {
+        com.google.firebase.auth.FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth ->
+            currentUserState = firebaseAuth.currentUser
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -179,6 +191,37 @@ fun MainScreen(
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = SaffronPrimary.copy(alpha = 0.2f))
                         
 
+                        // Auth / Profile Item
+                        NavigationDrawerItem(
+                            label = { 
+                                Text(
+                                    text = if (currentUserState == null) {
+                                        if (isEnglish) "Sign In / Register" else "साइन इन / रजिस्टर"
+                                    } else {
+                                        val nameStr = currentUserState?.displayName ?: currentUserState?.email ?: ""
+                                        if (isEnglish) "Sign Out ($nameStr)" else "साइन आउट ($nameStr)"
+                                    }, 
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Serif,
+                                    fontSize = 14.sp
+                                ) 
+                            },
+                            selected = false,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                if (currentUserState == null) {
+                                    onAuthClick()
+                                } else {
+                                    com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+                                    Toast.makeText(context, if (isEnglish) "Signed out successfully" else "सफलतापूर्वक साइन आउट किया गया", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            icon = { Icon(Icons.Default.Person, contentDescription = null, tint = SaffronPrimary) },
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            colors = NavigationDrawerItemDefaults.colors(
+                                unselectedTextColor = Color.White.copy(alpha = 0.9f)
+                            )
+                        )
 
                         // About Chittorgarh item
                         NavigationDrawerItem(

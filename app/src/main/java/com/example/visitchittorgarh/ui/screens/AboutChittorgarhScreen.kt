@@ -62,7 +62,7 @@ fun AboutChittorgarhScreen(
             nameHi = "विजय स्तम्भ",
             descEn = "A massive 9-story tower constructed by Maharana Kumbha in 1448 to commemorate his victory over the armies of Malwa and Gujarat.",
             descHi = "मालवा और गुजरात की सेनाओं पर अपनी जीत की स्मृति में 1448 में महाराणा कुंभा द्वारा निर्मित एक विशाल 9 मंजिला स्तंभ।",
-            image = "https://www.chittorgarh-tourism.in/vijay_stambh.jpg"
+            image = R.drawable.vijay_stambh
         ),
         TouristPlace(
             nameEn = "Kirti Stambh (Tower of Fame)",
@@ -118,7 +118,7 @@ fun AboutChittorgarhScreen(
             nameHi = "मेनाल जलप्रपात और मंदिर",
             descEn = "A scenic 150-feet waterfall dropping into a deep gorge, surrounded by ancient 11th-century temples resembling the Khajuraho art style.",
             descHi = "एक गहरी घाटी में गिरने वाला 150 फीट का मनोरम जलप्रपात, जो खजुराहो कला शैली से मिलते-जुलते प्राचीन 11वीं सदी के मंदिरों से घिरा हुआ है।",
-            image = "https://images.unsplash.com/photo-1508496404318-d419e9bc339c?w=800&auto=format&fit=crop"
+            image = "https://www.chittorgarh-tourism.in/menal_waterfall.jpg"
         )
     )
 

@@ -16,6 +16,9 @@ import com.example.visitchittorgarh.ui.screens.PartnerPortalScreen
 import com.example.visitchittorgarh.ui.screens.AboutDeveloperScreen
 import com.example.visitchittorgarh.ui.screens.AboutChittorgarhScreen
 import com.example.visitchittorgarh.ui.screens.HowToReachScreen
+import com.example.visitchittorgarh.ui.screens.EmergencyContactsScreen
+import com.example.visitchittorgarh.ui.screens.FoodRestaurantsScreen
+
 
 import androidx.compose.runtime.LaunchedEffect
 import com.example.visitchittorgarh.ui.screens.AuthScreen
@@ -88,6 +91,12 @@ fun MainNavigation() {
             },
             onAuthClick = {
               backStack.add(Auth)
+            },
+            onEmergencyContactsClick = {
+              backStack.add(EmergencyContacts)
+            },
+            onFoodRestaurantsClick = {
+              backStack.add(FoodRestaurants)
             }
           )
         }
@@ -141,6 +150,20 @@ fun MainNavigation() {
         entry<HowToReach> {
           val isEnglish = sharedPrefs.getBoolean("is_english", true)
           HowToReachScreen(
+            isEnglish = isEnglish,
+            onBackClick = { backStack.removeLastOrNull() }
+          )
+        }
+        entry<EmergencyContacts> {
+          val isEnglish = sharedPrefs.getBoolean("is_english", true)
+          EmergencyContactsScreen(
+            isEnglish = isEnglish,
+            onBackClick = { backStack.removeLastOrNull() }
+          )
+        }
+        entry<FoodRestaurants> {
+          val isEnglish = sharedPrefs.getBoolean("is_english", true)
+          FoodRestaurantsScreen(
             isEnglish = isEnglish,
             onBackClick = { backStack.removeLastOrNull() }
           )

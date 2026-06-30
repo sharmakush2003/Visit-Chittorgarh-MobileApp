@@ -52,7 +52,9 @@ fun MainScreen(
     onAboutDeveloperClick: () -> Unit,
     onAboutChittorgarhClick: () -> Unit,
     onHowToReachClick: () -> Unit,
-    onAuthClick: () -> Unit
+    onAuthClick: () -> Unit,
+    onEmergencyContactsClick: () -> Unit,
+    onFoodRestaurantsClick: () -> Unit
 ) {
     val context = LocalContext.current
     val sharedPrefs = remember { context.getSharedPreferences("chittorgarh_prefs", Context.MODE_PRIVATE) }
@@ -261,6 +263,50 @@ fun MainScreen(
                                 onAboutDeveloperClick()
                             },
                             icon = { Icon(Icons.Default.Info, contentDescription = null, tint = SaffronPrimary) },
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            colors = NavigationDrawerItemDefaults.colors(
+                                unselectedTextColor = Color.White.copy(alpha = 0.9f)
+                            )
+                        )
+
+                        // Emergency Contacts item
+                        NavigationDrawerItem(
+                            label = { 
+                                Text(
+                                    text = if (isEnglish) "Emergency Contacts" else "आपातकालीन संपर्क", 
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Serif,
+                                    fontSize = 14.sp
+                                ) 
+                            },
+                            selected = false,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                onEmergencyContactsClick()
+                            },
+                            icon = { Icon(Icons.Default.Call, contentDescription = null, tint = SaffronPrimary) },
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            colors = NavigationDrawerItemDefaults.colors(
+                                unselectedTextColor = Color.White.copy(alpha = 0.9f)
+                            )
+                        )
+
+                        // Food & Restaurants item
+                        NavigationDrawerItem(
+                            label = { 
+                                Text(
+                                    text = if (isEnglish) "Food & Restaurants" else "भोजन और रेस्तरां", 
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Serif,
+                                    fontSize = 14.sp
+                                ) 
+                            },
+                            selected = false,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                onFoodRestaurantsClick()
+                            },
+                            icon = { Icon(Icons.Default.Star, contentDescription = null, tint = SaffronPrimary) },
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                             colors = NavigationDrawerItemDefaults.colors(
                                 unselectedTextColor = Color.White.copy(alpha = 0.9f)

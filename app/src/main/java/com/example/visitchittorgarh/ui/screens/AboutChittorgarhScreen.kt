@@ -62,35 +62,35 @@ fun AboutChittorgarhScreen(
             nameHi = "विजय स्तम्भ",
             descEn = "A massive 9-story tower constructed by Maharana Kumbha in 1448 to commemorate his victory over the armies of Malwa and Gujarat.",
             descHi = "मालवा और गुजरात की सेनाओं पर अपनी जीत की स्मृति में 1448 में महाराणा कुंभा द्वारा निर्मित एक विशाल 9 मंजिला स्तंभ।",
-            image = R.drawable.vijay_stambh
+            image = "https://www.chittorgarh-tourism.in/vijay_stambh.jpg"
         ),
         TouristPlace(
             nameEn = "Kirti Stambh (Tower of Fame)",
             nameHi = "कीर्ति स्तम्भ",
             descEn = "A 12th-century tower built by a Jain merchant, dedicated to Adinath, the first Jain Tirthankara. Beautifully carved with Digambara figures.",
             descHi = "एक जैन व्यापारी द्वारा निर्मित 12वीं सदी का स्तंभ, जो पहले जैन तीर्थंकर आदिनाथ को समर्पित है। दिगंबर आकृतियों से सुंदर नक्काशी की गई है।",
-            image = "https://images.unsplash.com/photo-1603258591326-e14541824a8e?w=800&auto=format&fit=crop"
+            image = "https://www.chittorgarh-tourism.in/Each%20page%20Pics/Fort%20pics/Kirti%20Stambh.jpg"
         ),
         TouristPlace(
             nameEn = "Padmini Palace",
             nameHi = "पद्मिनी महल",
             descEn = "The royal palace of Queen Padmini, located near the water body where Delhi Sultan Alauddin Khilji was allowed a glimpse of the queen's reflection.",
             descHi = "रानी पद्मिनी का शाही महल, जो जलाशय के पास स्थित है जहाँ दिल्ली के सुल्तान अलाउद्दीन खिलजी को रानी के प्रतिबिंब की झलक देखने की अनुमति दी गई थी।",
-            image = "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&auto=format&fit=crop"
+            image = "https://www.chittorgarh-tourism.in/Each%20page%20Pics/Fort%20pics/Padmini%20Palace.jpg"
         ),
         TouristPlace(
             nameEn = "Rana Kumbha Palace",
             nameHi = "राणा कुम्भा महल",
             descEn = "The ruined palace of Maharana Kumbha, featuring beautiful Mewari architecture. It is also the historic site where Jauhar took place.",
             descHi = "महाराणा कुंभा का खंडहर महल, जिसमें सुंदर मेवाड़ी वास्तुकला है। यह वही ऐतिहासिक स्थल भी है जहाँ जौहर की रस्म हुई थी।",
-            image = "https://images.unsplash.com/photo-1600703136783-bdd5ee2a252f?w=800&auto=format&fit=crop"
+            image = "https://www.chittorgarh-tourism.in/Each%20page%20Pics/Fort%20pics/Rana%20Kumbha%20Palace.jpg"
         ),
         TouristPlace(
             nameEn = "Gaumukh Reservoir",
             nameHi = "गौमुख कुंड",
             descEn = "A deep sacred pool fed by a natural spring flowing from a rock shaped like a cow's mouth. A tranquil spiritual site inside the fort.",
             descHi = "एक गहरा पवित्र कुंड जो गाय के मुंह के आकार की चट्टान से बहने वाले प्राकृतिक झरने से भरा रहता है। किले के अंदर एक शांत आध्यात्मिक स्थल।",
-            image = "https://images.unsplash.com/photo-1545128485-c400e7702796?w=800&auto=format&fit=crop"
+            image = "https://www.chittorgarh-tourism.in/Each%20page%20Pics/Fort%20pics/Gaumukh%20Reservoir.jpg"
         ),
         TouristPlace(
             nameEn = "Sanwariaji Temple",
@@ -104,7 +104,7 @@ fun AboutChittorgarhScreen(
             nameHi = "मीरा मंदिर",
             descEn = "Built by Rana Kumbha, this temple is dedicated to the saint-poetess Meera Bai and her pure devotion to Lord Krishna. Features a small shrine of Saint Ravidas.",
             descHi = "महाराणा कुंभा द्वारा निर्मित, यह मंदिर संत-कवयित्री मीरा बाई और भगवान कृष्ण के प्रति उनकी शुद्ध भक्ति को समर्पित है। इसमें संत रविदास का एक छोटा मंदिर है।",
-            image = "https://images.unsplash.com/photo-1602643163983-ed0babc39797?w=800&auto=format&fit=crop"
+            image = "https://www.chittorgarh-tourism.in/Each%20page%20Pics/Fort%20pics/Meera%20Bai%20Temple.jpg"
         ),
         TouristPlace(
             nameEn = "Matrikundia Temple",

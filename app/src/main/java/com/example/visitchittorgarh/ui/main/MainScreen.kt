@@ -105,8 +105,11 @@ fun MainScreen(
                             RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
                         )
                 ) {
+                    val drawerScrollState = rememberScrollState()
                     Column(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(drawerScrollState)
                     ) {
                         // Header Banner - Royal Gradient
                         Box(
@@ -190,7 +193,7 @@ fun MainScreen(
                             )
                         }
 
-                        Spacer(modifier = Modifier.weight(1f))
+                        Spacer(modifier = Modifier.height(16.dp))
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = SaffronPrimary.copy(alpha = 0.2f))
                         
 

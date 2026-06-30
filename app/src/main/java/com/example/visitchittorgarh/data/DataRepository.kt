@@ -576,7 +576,7 @@ class DefaultDataRepository : DataRepository {
         emit(
             listOf(
                 StayOption(
-                    name = "Bassi Fort Palace",
+                    name = "X_Y_Z Palace",
                     type = Translation(
                         en = "Heritage Stay",
                         hi = "विरासत निवास"
@@ -593,7 +593,7 @@ class DefaultDataRepository : DataRepository {
                     imageUrl = R.drawable.palace_stay
                 ),
                 StayOption(
-                    name = "Hotel Padmini",
+                    name = "Y_Z Hotel",
                     type = Translation(
                         en = "Premium Hotel",
                         hi = "प्रीमियम होटल"
@@ -610,7 +610,7 @@ class DefaultDataRepository : DataRepository {
                     imageUrl = R.drawable.palace_stay
                 ),
                 StayOption(
-                    name = "The Castle Bijaipur",
+                    name = "A_B_C Resort",
                     type = Translation(
                         en = "Heritage Lodge & Camps",
                         hi = "विरासत लॉज और शिविर"

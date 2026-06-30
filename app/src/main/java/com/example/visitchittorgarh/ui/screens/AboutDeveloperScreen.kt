@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.visitchittorgarh.theme.CrimsonDark
 import com.example.visitchittorgarh.theme.CrimsonSecondary
 import com.example.visitchittorgarh.theme.GoldAccent
@@ -88,23 +89,25 @@ fun AboutDeveloperScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                     Box(
                         modifier = Modifier
-                            .size(72.dp)
+                            .size(80.dp)
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.15f), CircleShape)
+                            .background(Color.White.copy(alpha = 0.1f), CircleShape)
                             .border(1.5.dp, GoldAccent, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "🚀",
-                            fontSize = 36.sp,
-                            textAlign = TextAlign.Center
+                        AsyncImage(
+                            model = "https://chittortech.online/logo.png",
+                            contentDescription = "ChittorTech Logo",
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clip(CircleShape)
                         )
                     }
                     Spacer(modifier = Modifier.height(14.dp))
                     Text(
-                        text = "ChittorTech Solutions",
+                        text = "ChittorTech",
                         color = GoldAccent,
-                        fontSize = 24.sp,
+                        fontSize = 26.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Serif,
                         textAlign = TextAlign.Center
@@ -265,7 +268,7 @@ fun AboutDeveloperScreen(
 
                 // Section: Projects
                 Text(
-                    text = if (isEnglish) "Our Projects" else "हमारे प्रोजेक्ट्स",
+                    text = if (isEnglish) "Our Digital Projects" else "हमारे डिजिटल प्रोजेक्ट्स",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     fontFamily = FontFamily.Serif,
@@ -274,9 +277,31 @@ fun AboutDeveloperScreen(
 
                 // Project List
                 val projects = listOf(
-                    Triple("Visit Chittorgarh App", "Tourism Travel-Tech platform with native pass bookings & direct local vendor connection.", "Active"),
-                    Triple("Mewari Achaar App", "Mobile E-Commerce system facilitating native ordering of local Mewari pickles.", "Active"),
-                    Triple("Digify Gift Shop Portal", "Enterprise multi-vendor e-commerce platform and CRM architecture.", "Active")
+                    Triple(
+                        "Visit Chittorgarh App",
+                        "A premium travel-tech mobile application and digital concierge portal built with Jetpack Compose, Kotlin, and Firebase. It offers seamless native pass generation, direct tour package bookings, and real-time vendor management without middleman commissions, empowering local tourism.",
+                        "Active"
+                    ),
+                    Triple(
+                        "Mewari Achaar App",
+                        "A fluid Android e-commerce application built in native Kotlin, designed to digitize traditional food delivery. It features high-performance 60FPS Lottie vector animation modules, highly responsive Firestore databases, background data sync routines, and secure Google Sign-in protocols.",
+                        "Active"
+                    ),
+                    Triple(
+                        "Digify Gift Shop Portal",
+                        "A robust corporate multi-vendor e-commerce platform and customer CRM suite built using Next.js, Node.js, Express, and MongoDB. It integrates automatic inventory sync, multi-currency payment nodes, order processing pipelines, and secure analytics dashboards.",
+                        "Active"
+                    ),
+                    Triple(
+                        "SaaS Enterprise & AI Solutions",
+                        "Tailor-made cloud architectures, enterprise customer dashboards, custom AI Chatbots (RAG), and digital automation workflows. Engineered on Next.js, Node.js, and MongoDB, these systems streamline operations, enhance client interaction, and process big data securely.",
+                        "Active"
+                    ),
+                    Triple(
+                        "Business & Corporate Web Portals",
+                        "High-performance, pixel-perfect, and mobile-responsive website systems engineered for corporate brands, educational bodies, and local startups. Optimised for speed, SEO rankings, Google schema markup, and multi-channel customer lead generation.",
+                        "Active"
+                    )
                 )
 
                 projects.forEach { proj ->
@@ -285,19 +310,19 @@ fun AboutDeveloperScreen(
                         shape = RoundedCornerShape(10.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(14.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
                                 Text(proj.first, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Text(proj.second, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                Badge(containerColor = SaffronPrimary.copy(alpha = 0.2f), contentColor = SaffronPrimary) {
+                                    Text(proj.third, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                                }
                             }
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Badge(containerColor = SaffronPrimary.copy(alpha = 0.2f), contentColor = SaffronPrimary) {
-                                Text(proj.third, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
-                            }
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(proj.second, fontSize = 11.sp, lineHeight = 16.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                         }
                     }
                 }

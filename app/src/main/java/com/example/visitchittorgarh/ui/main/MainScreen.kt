@@ -54,7 +54,8 @@ fun MainScreen(
     onHowToReachClick: () -> Unit,
     onAuthClick: () -> Unit,
     onEmergencyContactsClick: () -> Unit,
-    onWeatherClick: () -> Unit
+    onWeatherClick: () -> Unit,
+    onUPIGuideClick: () -> Unit
 ) {
     val context = LocalContext.current
     val sharedPrefs = remember { context.getSharedPreferences("chittorgarh_prefs", Context.MODE_PRIVATE) }
@@ -312,6 +313,29 @@ fun MainScreen(
                                 unselectedTextColor = Color.White.copy(alpha = 0.9f)
                             )
                         )
+
+                        // Payments & UPI Guide item
+                        NavigationDrawerItem(
+                            label = { 
+                                Text(
+                                    text = if (isEnglish) "Payments & Currency" else "भुगतान और मुद्रा", 
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Serif,
+                                    fontSize = 14.sp
+                                ) 
+                            },
+                            selected = false,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                onUPIGuideClick()
+                            },
+                            icon = { Icon(Icons.Default.Star, contentDescription = null, tint = SaffronPrimary) },
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            colors = NavigationDrawerItemDefaults.colors(
+                                unselectedTextColor = Color.White.copy(alpha = 0.9f)
+                            )
+                        )
+
 
                         // Partner Portal item
                         NavigationDrawerItem(

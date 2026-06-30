@@ -18,6 +18,7 @@ import com.example.visitchittorgarh.ui.screens.AboutChittorgarhScreen
 import com.example.visitchittorgarh.ui.screens.HowToReachScreen
 import com.example.visitchittorgarh.ui.screens.EmergencyContactsScreen
 import com.example.visitchittorgarh.ui.screens.WeatherScreen
+import com.example.visitchittorgarh.ui.screens.UPIGuideScreen
 
 
 import androidx.compose.runtime.LaunchedEffect
@@ -97,6 +98,9 @@ fun MainNavigation() {
             },
             onWeatherClick = {
               backStack.add(Weather)
+            },
+            onUPIGuideClick = {
+              backStack.add(UPIGuide)
             }
           )
         }
@@ -164,6 +168,13 @@ fun MainNavigation() {
         entry<Weather> {
           val isEnglish = sharedPrefs.getBoolean("is_english", true)
           WeatherScreen(
+            isEnglish = isEnglish,
+            onBackClick = { backStack.removeLastOrNull() }
+          )
+        }
+        entry<UPIGuide> {
+          val isEnglish = sharedPrefs.getBoolean("is_english", true)
+          UPIGuideScreen(
             isEnglish = isEnglish,
             onBackClick = { backStack.removeLastOrNull() }
           )

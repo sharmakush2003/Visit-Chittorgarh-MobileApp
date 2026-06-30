@@ -29,3 +29,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object Weather : NavKey
 
+@Serializable data object UPIGuide : NavKey
+

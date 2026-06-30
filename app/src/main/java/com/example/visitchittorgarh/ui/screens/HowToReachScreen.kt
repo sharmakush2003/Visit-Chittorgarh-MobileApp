@@ -237,7 +237,7 @@ fun HowToReachScreen(
                     .height(200.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.vijay_stambh),
+                    painter = painterResource(id = R.drawable.chittorgarh_fort),
                     contentDescription = "Chittorgarh Fort Banner",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()

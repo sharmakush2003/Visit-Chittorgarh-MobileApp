@@ -12,11 +12,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -74,7 +76,7 @@ fun AboutChittorgarhScreen(
             nameHi = "पद्मिनी महल",
             descEn = "The royal palace of Queen Padmini, located near the water body where Delhi Sultan Alauddin Khilji was allowed a glimpse of the queen's reflection.",
             descHi = "रानी पद्मिनी का शाही महल, जो जलाशय के पास स्थित है जहाँ दिल्ली के सुल्तान अलाउद्दीन खिलजी को रानी के प्रतिबिंब की झलक देखने की अनुमति दी गई थी।",
-            image = "https://www.visitchittorgarh.in/assets/images/padmini_palace.jpg"
+            image = "https://www.visitchittorgarh.in/assets/images/Padmini%20Palace.jpg"
         ),
         TouristPlace(
             nameEn = "Rana Kumbha Palace",
@@ -327,15 +329,42 @@ fun AboutChittorgarhScreen(
                                 )
                             }
 
-                            // Description panel
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = if (isEnglish) place.descEn else place.descHi,
-                                    fontSize = 13.sp,
-                                    lineHeight = 18.sp,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                                )
-                            }
+                             // Description panel
+                             Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                                 Text(
+                                     text = if (isEnglish) place.descEn else place.descHi,
+                                     fontSize = 13.sp,
+                                     lineHeight = 18.sp,
+                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                 )
+                                 Spacer(modifier = Modifier.height(8.dp))
+                                 val context = LocalContext.current
+                                 TextButton(
+                                     onClick = {
+                                         val destinationName = "${place.nameEn}, Chittorgarh, Rajasthan"
+                                         val intent = android.content.Intent(
+                                             android.content.Intent.ACTION_VIEW,
+                                             android.net.Uri.parse("https://www.google.com/maps/dir/?api=1&destination=${java.net.URLEncoder.encode(destinationName, "UTF-8")}")
+                                         )
+                                         context.startActivity(intent)
+                                     },
+                                     contentPadding = PaddingValues(0.dp),
+                                     colors = ButtonDefaults.textButtonColors(contentColor = SaffronPrimary)
+                                 ) {
+                                     Icon(
+                                         imageVector = Icons.Default.LocationOn,
+                                         contentDescription = "Get Directions",
+                                         tint = SaffronPrimary,
+                                         modifier = Modifier.size(16.dp)
+                                     )
+                                     Spacer(modifier = Modifier.width(4.dp))
+                                     Text(
+                                         text = if (isEnglish) "Get Directions" else "दिशा-निर्देश प्राप्त करें",
+                                         fontWeight = FontWeight.Bold,
+                                         fontSize = 13.sp
+                                     )
+                                 }
+                             }
                         }
                     }
                 }

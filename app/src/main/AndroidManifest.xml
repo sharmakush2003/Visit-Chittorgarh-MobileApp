@@ -13,6 +13,7 @@
         android:roundIcon="@drawable/logo_maharana"
         android:supportsRtl="true"
         android:windowSoftInputMode="adjustResize"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.VisitChittorgarh">
         <activity
             android:name=".MainActivity"

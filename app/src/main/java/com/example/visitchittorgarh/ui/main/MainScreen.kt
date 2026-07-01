@@ -166,10 +166,7 @@ fun MainScreen(
 
                         // Navigation Drawer Items with Serif font style
                         val menuItems = listOf(
-                            Triple(0, Icons.Default.Home, if (isEnglish) "Home Dashboard" else "होम डैशबोर्ड"),
-                            Triple(1, Icons.Default.Star, if (isEnglish) "Royal Tour Packages" else "शाही यात्रा पैकेज"),
-                            Triple(2, Icons.Default.Call, if (isEnglish) "Concierge Services" else "द्वारपाल सेवाएं"),
-                            Triple(3, Icons.Default.Info, if (isEnglish) "Vocal for Local" else "लोकल के लिए वोकल")
+                            Triple(0, Icons.Default.Home, if (isEnglish) "Home Dashboard" else "होम डैशबोर्ड")
                         )
 
                         menuItems.forEach { (index, icon, label) ->

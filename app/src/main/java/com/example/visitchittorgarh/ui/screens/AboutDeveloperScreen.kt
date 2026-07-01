@@ -135,7 +135,7 @@ fun AboutDeveloperScreen(
 
             Column(
                 modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 // Intro Text Card
                 Card(
@@ -175,7 +175,7 @@ fun AboutDeveloperScreen(
                         Column(modifier = Modifier.padding(14.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "iStart Rajasthan",
+                                    text = "iStart Approved",
                                     fontWeight = FontWeight.Bold,
                                     color = SaffronPrimary,
                                     fontSize = 12.sp,
@@ -186,7 +186,7 @@ fun AboutDeveloperScreen(
                             }
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Bronze Rating\nStartup ID: 05F896CE",
+                                text = "iStart Rajasthan\nBronze Rating\nID: 05F896CE",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color.Black.copy(alpha = 0.6f),
@@ -385,22 +385,21 @@ fun AboutDeveloperScreen(
                         border = BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.12f)),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
+                        Column(modifier = Modifier.padding(12.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .background(SaffronPrimary.copy(alpha = 0.08f), CircleShape),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(proj.third, fontSize = 16.sp)
-                                    }
-                                    Spacer(modifier = Modifier.width(10.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .background(SaffronPrimary.copy(alpha = 0.08f), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(proj.third, fontSize = 16.sp)
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = proj.first,
                                         fontWeight = FontWeight.Bold,
@@ -408,22 +407,42 @@ fun AboutDeveloperScreen(
                                         fontFamily = FontFamily.Serif,
                                         color = CrimsonSecondary
                                     )
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(Color(0xFFE8F5E9))
-                                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                                ) {
-                                    Text(
-                                        text = if (isEnglish) "ACTIVE" else "सक्रिय",
-                                        color = Color(0xFF2E7D32),
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(Color(0xFFE8F5E9))
+                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                        ) {
+                                            Text(
+                                                text = if (isEnglish) "ACTIVE" else "सक्रिय",
+                                                color = Color(0xFF2E7D32),
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(SaffronPrimary.copy(alpha = 0.15f))
+                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                        ) {
+                                            Text(
+                                                text = "iStart Approved",
+                                                color = SaffronPrimary,
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                fontFamily = FontFamily.Serif
+                                            )
+                                        }
+                                    }
                                 }
                             }
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = proj.second,
                                 fontSize = 12.sp,

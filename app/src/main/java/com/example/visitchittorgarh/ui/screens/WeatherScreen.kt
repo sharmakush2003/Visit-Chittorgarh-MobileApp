@@ -358,7 +358,7 @@ suspend fun fetchOpenMeteoWeather(lat: Double, lon: Double): WeatherData? = with
     }
 }
 
-// ─── Network Fetch: Online Geocoding Search ──────────────────────────────────
+// ─── Network Fetch: Online Geocoding Search (Prioritizes Rajasthan) ───────────
 
 suspend fun searchCitiesOnline(query: String): List<WeatherLocation> = withContext(Dispatchers.IO) {
     try {
@@ -389,6 +389,12 @@ suspend fun searchCitiesOnline(query: String): List<WeatherLocation> = withConte
                 )
             }
         }
+        
+        // Sort: Put Rajasthan locations at the top, followed by others alphabetically by name
+        list.sortWith(
+            compareByDescending<WeatherLocation> { it.stateEn.equals("Rajasthan", ignoreCase = true) }
+                .thenBy { it.nameEn }
+        )
         list
     } catch (e: Exception) {
         emptyList()
@@ -598,12 +604,12 @@ fun WeatherScreen(
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Column {
                                             Text(
-                                                text = if (isEnglish) loc.nameEn else loc.nameHi,
+                                                text = "${if (isEnglish) loc.nameEn else loc.nameHi} (${loc.stateEn})",
                                                 fontWeight = FontWeight.Bold,
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
                                             Text(
-                                                text = loc.stateEn,
+                                                text = if (isEnglish) "India" else "भारत",
                                                 fontSize = 11.sp,
                                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                             )

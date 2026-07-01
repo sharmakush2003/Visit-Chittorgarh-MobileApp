@@ -361,23 +361,14 @@ fun MainScreen(
                 ) {
                     TopAppBar(
                         title = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "🏰",
-                                    fontSize = 20.sp
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = if (isEnglish) "ROYAL CHITTORGARH" else "शाही चित्तौड़गढ़",
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 17.sp,
-                                    fontFamily = FontFamily.Serif,
-                                    color = CrimsonSecondary,
-                                    letterSpacing = 0.5.sp
-                                )
-                            }
+                            Text(
+                                text = if (isEnglish) "ROYAL CHITTORGARH" else "शाही चित्तौड़गढ़",
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 18.sp,
+                                fontFamily = FontFamily.Serif,
+                                color = CrimsonSecondary,
+                                letterSpacing = 1.5.sp
+                            )
                         },
                         navigationIcon = {
                             IconButton(onClick = { scope.launch { drawerState.open() } }) {

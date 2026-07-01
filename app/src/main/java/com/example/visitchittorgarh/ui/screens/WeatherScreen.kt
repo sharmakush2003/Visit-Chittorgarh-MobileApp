@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.sp
 import com.example.visitchittorgarh.theme.GoldAccent
 import com.example.visitchittorgarh.theme.SaffronPrimary
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.URL
@@ -51,33 +50,49 @@ data class WeatherLocation(
     val stateEn: String
 )
 
+// The 41 districts of Rajasthan as requested
 val weatherLocations = listOf(
     WeatherLocation("Chittorgarh", "चित्तौड़गढ़", 24.8887, 74.6269, "Rajasthan"),
+    WeatherLocation("Ajmer", "अजमेर", 26.4499, 74.6399, "Rajasthan"),
+    WeatherLocation("Alwar", "अलवर", 27.5530, 76.6346, "Rajasthan"),
+    WeatherLocation("Balotra", "बालोतरा", 25.8322, 72.2422, "Rajasthan"),
+    WeatherLocation("Banswara", "बांसवाड़ा", 23.5461, 74.4348, "Rajasthan"),
+    WeatherLocation("Baran", "बारां", 25.1011, 76.5111, "Rajasthan"),
+    WeatherLocation("Barmer", "बाड़मेर", 25.7532, 71.4181, "Rajasthan"),
+    WeatherLocation("Beawar", "ब्यावर", 26.1014, 74.3184, "Rajasthan"),
+    WeatherLocation("Bharatpur", "भरतपुर", 27.2152, 77.4930, "Rajasthan"),
+    WeatherLocation("Bhilwara", "भीलवाड़ा", 25.3484, 74.6384, "Rajasthan"),
+    WeatherLocation("Bikaner", "बीकानेर", 28.0229, 73.3119, "Rajasthan"),
+    WeatherLocation("Bundi", "बूंदी", 25.4414, 75.6414, "Rajasthan"),
+    WeatherLocation("Churu", "चूरू", 28.2917, 74.9667, "Rajasthan"),
+    WeatherLocation("Dausa", "दौसा", 26.8920, 76.3310, "Rajasthan"),
+    WeatherLocation("Deeg", "डीग", 27.4722, 77.3278, "Rajasthan"),
+    WeatherLocation("Didwana-Kuchaman", "डीडवाना-कुचामन", 27.3997, 74.5667, "Rajasthan"),
+    WeatherLocation("Dholpur", "धौलपुर", 26.6989, 77.8931, "Rajasthan"),
+    WeatherLocation("Dungarpur", "डूंगरपुर", 23.8411, 73.7142, "Rajasthan"),
+    WeatherLocation("Hanumangarh", "हनुमानगढ़", 29.5800, 74.3200, "Rajasthan"),
     WeatherLocation("Jaipur", "जयपुर", 26.9124, 75.7873, "Rajasthan"),
-    WeatherLocation("Udaipur", "उदयपुर", 24.5854, 73.7125, "Rajasthan"),
-    WeatherLocation("Jodhpur", "जोधपुर", 26.2389, 73.0243, "Rajasthan"),
     WeatherLocation("Jaisalmer", "जैसलमेर", 26.9157, 70.9083, "Rajasthan"),
-    WeatherLocation("New Delhi", "नई दिल्ली", 28.6139, 77.2090, "Delhi"),
-    WeatherLocation("Mumbai", "मुंबई", 19.0760, 72.8777, "Maharashtra"),
-    WeatherLocation("Bengaluru", "बेंगलुरु", 12.9716, 77.5946, "Karnataka"),
-    WeatherLocation("Kolkata", "कोलकाता", 22.5726, 88.3639, "West Bengal"),
-    WeatherLocation("Chennai", "चेन्नई", 13.0827, 80.2707, "Tamil Nadu"),
-    WeatherLocation("Hyderabad", "हैदराबाद", 17.3850, 78.4867, "Telangana"),
-    WeatherLocation("Ahmedabad", "अहमदाबाद", 23.0225, 72.5714, "Gujarat"),
-    WeatherLocation("Agra", "आगरा", 27.1767, 78.0081, "Uttar Pradesh"),
-    WeatherLocation("Varanasi", "वाराणसी", 25.3176, 82.9739, "Uttar Pradesh"),
-    WeatherLocation("Srinagar", "श्रीनगर", 34.0837, 74.7973, "Jammu & Kashmir"),
-    WeatherLocation("Shimla", "शिमला", 31.1048, 77.1734, "Himachal Pradesh"),
-    WeatherLocation("Manali", "मनाली", 32.2396, 77.1887, "Himachal Pradesh"),
-    WeatherLocation("Amritsar", "अमृतसर", 31.6340, 74.8723, "Punjab"),
-    WeatherLocation("Goa", "गोवा", 15.4909, 73.8278, "Goa"),
-    WeatherLocation("Kochi", "कोच्चि", 9.9312, 76.2673, "Kerala"),
-    WeatherLocation("Darjeeling", "दार्जिलिंग", 27.0410, 88.2627, "West Bengal"),
-    WeatherLocation("Ooty", "ऊटी", 11.4102, 76.6950, "Tamil Nadu"),
-    WeatherLocation("Pune", "पुणे", 18.5204, 73.8567, "Maharashtra"),
-    WeatherLocation("Bhopal", "भोपाल", 23.2599, 77.4126, "Madhya Pradesh"),
-    WeatherLocation("Patna", "पटना", 25.5941, 85.1376, "Bihar"),
-    WeatherLocation("Rishikesh", "ऋषिकेश", 30.0869, 78.2676, "Uttarakhand")
+    WeatherLocation("Jalore", "जालौर", 25.3422, 72.6169, "Rajasthan"),
+    WeatherLocation("Jhalawar", "झालावाड़", 24.5973, 76.1610, "Rajasthan"),
+    WeatherLocation("Jhunjhunu", "झुंझुनू", 28.1289, 75.3995, "Rajasthan"),
+    WeatherLocation("Jodhpur", "जोधपुर", 26.2389, 73.0243, "Rajasthan"),
+    WeatherLocation("Karauli", "करौली", 26.4950, 77.0250, "Rajasthan"),
+    WeatherLocation("Khairthal-Tijara", "खैरथल-तिजारा", 27.8011, 76.6341, "Rajasthan"),
+    WeatherLocation("Kota", "कोटा", 25.1825, 75.8369, "Rajasthan"),
+    WeatherLocation("Kotputli-Behror", "कोटपुतली-बहरोड़", 27.7022, 76.1922, "Rajasthan"),
+    WeatherLocation("Nagaur", "नागौर", 27.2000, 73.7333, "Rajasthan"),
+    WeatherLocation("Pali", "पाली", 25.7725, 73.3234, "Rajasthan"),
+    WeatherLocation("Phalodi", "फलोदी", 27.1333, 72.3667, "Rajasthan"),
+    WeatherLocation("Pratapgarh", "प्रतापगढ़", 24.0320, 74.7811, "Rajasthan"),
+    WeatherLocation("Rajsamand", "राजसमंद", 25.0717, 73.8814, "Rajasthan"),
+    WeatherLocation("Salumbar", "सलूम्बर", 24.1333, 74.0500, "Rajasthan"),
+    WeatherLocation("Sawai Madhopur", "सवाई माधोपुर", 25.9928, 76.3525, "Rajasthan"),
+    WeatherLocation("Sikar", "सीकर", 27.6018, 75.1396, "Rajasthan"),
+    WeatherLocation("Sirohi", "सिरोही", 24.8826, 72.8684, "Rajasthan"),
+    WeatherLocation("Sri Ganganagar", "श्रीगंगानगर", 29.9167, 73.8833, "Rajasthan"),
+    WeatherLocation("Tonk", "टोंक", 26.1620, 75.7895, "Rajasthan"),
+    WeatherLocation("Udaipur", "उदयपुर", 24.5854, 73.7125, "Rajasthan")
 )
 
 data class WeatherData(
@@ -358,49 +373,6 @@ suspend fun fetchOpenMeteoWeather(lat: Double, lon: Double): WeatherData? = with
     }
 }
 
-// ─── Network Fetch: Online Geocoding Search (Prioritizes Rajasthan) ───────────
-
-suspend fun searchCitiesOnline(query: String): List<WeatherLocation> = withContext(Dispatchers.IO) {
-    try {
-        val encodedQuery = java.net.URLEncoder.encode(query, "UTF-8")
-        val urlStr = "https://geocoding-api.open-meteo.com/v1/search?name=$encodedQuery&count=25&language=en&format=json"
-        val raw = URL(urlStr).readText(Charsets.UTF_8)
-        val json = JSONObject(raw)
-        if (!json.has("results")) return@withContext emptyList<WeatherLocation>()
-
-        val results = json.getJSONArray("results")
-        val list = mutableListOf<WeatherLocation>()
-        for (i in 0 until results.length()) {
-            val item = results.getJSONObject(i)
-            val countryCode = item.optString("country_code", "")
-            if (countryCode.equals("IN", ignoreCase = true)) {
-                val name = item.getString("name")
-                val lat = item.getDouble("latitude")
-                val lon = item.getDouble("longitude")
-                val state = item.optString("admin1", "India")
-                list.add(
-                    WeatherLocation(
-                        nameEn = name,
-                        nameHi = name,
-                        lat = lat,
-                        lon = lon,
-                        stateEn = state
-                    )
-                )
-            }
-        }
-        
-        // Sort: Put Rajasthan locations at the top, followed by others alphabetically by name
-        list.sortWith(
-            compareByDescending<WeatherLocation> { it.stateEn.equals("Rajasthan", ignoreCase = true) }
-                .thenBy { it.nameEn }
-        )
-        list
-    } catch (e: Exception) {
-        emptyList()
-    }
-}
-
 // ═══════════════════════════════════════════════════════════════════════
 // MAIN WEATHER SCREEN
 // ═══════════════════════════════════════════════════════════════════════
@@ -416,7 +388,6 @@ fun WeatherScreen(
 
     var searchQuery by remember { mutableStateOf("") }
     var filteredLocations by remember { mutableStateOf(weatherLocations) }
-    var isSearchingOnline by remember { mutableStateOf(false) }
 
     var weather by remember { mutableStateOf<WeatherData?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -438,22 +409,19 @@ fun WeatherScreen(
         if (!showSearchDialog) {
             searchQuery = ""
             filteredLocations = weatherLocations
-            isSearchingOnline = false
         }
     }
 
-    // Debounced Search triggers Geocoding API lookups
+    // Local filter on the 41 Rajasthan districts (runs instantly, zero network call)
     LaunchedEffect(searchQuery) {
         val query = searchQuery.trim()
-        if (query.length >= 3) {
-            isSearchingOnline = true
-            delay(500) // Debounce delay to prevent network spamming
-            val results = searchCitiesOnline(query)
-            filteredLocations = results
-            isSearchingOnline = false
+        filteredLocations = if (query.isEmpty()) {
+            weatherLocations
         } else {
-            filteredLocations = weatherLocations
-            isSearchingOnline = false
+            weatherLocations.filter {
+                it.nameEn.contains(query, ignoreCase = true) ||
+                it.nameHi.contains(query, ignoreCase = true)
+            }
         }
     }
 
@@ -519,7 +487,7 @@ fun WeatherScreen(
                     )
                 }
                 Text(
-                    text = if (isEnglish) "Tap to change city" else "शहर बदलने के लिए टैप करें",
+                    text = if (isEnglish) "Tap to change district" else "जिला बदलने के लिए टैप करें",
                     color = SaffronPrimary,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold
@@ -534,13 +502,13 @@ fun WeatherScreen(
             }
         }
 
-        // Real-time City Search/Select Dialog
+        // Local District Selection Dialog
         if (showSearchDialog) {
             AlertDialog(
                 onDismissRequest = { showSearchDialog = false },
                 title = {
                     Text(
-                        text = if (isEnglish) "Select City in India" else "भारत में शहर चुनें",
+                        text = if (isEnglish) "Select District in Rajasthan" else "राजस्थान का जिला चुनें",
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Serif
@@ -553,7 +521,7 @@ fun WeatherScreen(
                             onValueChange = { searchQuery = it },
                             placeholder = {
                                 Text(
-                                    if (isEnglish) "Search city (e.g. Udaipur, Churu)..." else "शहर खोजें (जैसे Udaipur, Churu)...",
+                                    if (isEnglish) "Search district (e.g. Udaipur, Churu)..." else "जिला खोजें (जैसे Udaipur, Churu)...",
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                 )
                             },
@@ -567,69 +535,55 @@ fun WeatherScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        if (isSearchingOnline) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(120.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(
-                                    color = SaffronPrimary,
-                                    modifier = Modifier.size(36.dp)
-                                )
-                            }
-                        } else {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .height(260.dp)
-                                    .fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                items(filteredLocations.size) { index ->
-                                    val loc = filteredLocations[index]
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .clickable {
-                                                selectedLocation = loc
-                                                showSearchDialog = false
-                                                refreshTrigger++
-                                            }
-                                            .padding(vertical = 12.dp, horizontal = 8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text("📍", fontSize = 16.sp)
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Column {
-                                            Text(
-                                                text = "${if (isEnglish) loc.nameEn else loc.nameHi} (${loc.stateEn})",
-                                                fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
-                                            Text(
-                                                text = if (isEnglish) "India" else "भारत",
-                                                fontSize = 11.sp,
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                            )
+                        LazyColumn(
+                            modifier = Modifier
+                                .height(260.dp)
+                                .fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            items(filteredLocations.size) { index ->
+                                val loc = filteredLocations[index]
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .clickable {
+                                            selectedLocation = loc
+                                            showSearchDialog = false
+                                            refreshTrigger++
                                         }
+                                        .padding(vertical = 12.dp, horizontal = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("📍", fontSize = 16.sp)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            text = if (isEnglish) loc.nameEn else loc.nameHi,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = if (isEnglish) "Rajasthan, India" else "राजस्थान, भारत",
+                                            fontSize = 11.sp,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                        )
                                     }
                                 }
-                                if (filteredLocations.isEmpty()) {
-                                    item {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = 32.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = if (isEnglish) "No cities found" else "कोई शहर नहीं मिला",
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                                fontSize = 14.sp
-                                            )
-                                        }
+                            }
+                            if (filteredLocations.isEmpty()) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 32.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = if (isEnglish) "No districts found" else "कोई जिला नहीं मिला",
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                            fontSize = 14.sp
+                                        )
                                     }
                                 }
                             }

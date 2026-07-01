@@ -7,18 +7,23 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -26,6 +31,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -42,6 +48,7 @@ import com.example.visitchittorgarh.theme.CrimsonDark
 import com.example.visitchittorgarh.theme.CrimsonSecondary
 import com.example.visitchittorgarh.theme.GoldAccent
 import com.example.visitchittorgarh.theme.SaffronPrimary
+import com.example.visitchittorgarh.theme.SlateBackgroundLight
 
 // Custom data structure for search results
 data class TransitRoute(
@@ -73,6 +80,7 @@ fun HowToReachScreen(
     var manualCityInput by remember { mutableStateOf("") }
     var activeRouteInfo by remember { mutableStateOf<TransitRoute?>(null) }
     var useManualSearch by remember { mutableStateOf(false) }
+    var selectedMode by remember { mutableIntStateOf(0) } // 0: Air, 1: Rail, 2: Road
 
     // Hardcoded major source cities database with custom Google Maps directions
     val cityDatabase = remember {
@@ -204,37 +212,44 @@ fun HowToReachScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = if (isEnglish) "How to Reach" else "चित्तौड़गढ़ कैसे पहुंचें",
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Serif,
-                        fontSize = 20.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = SaffronPrimary)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
-            )
+            Surface(
+                tonalElevation = 6.dp,
+                shadowElevation = 6.dp,
+                color = SlateBackgroundLight
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = if (isEnglish) "HOW TO REACH" else "चित्तौड़गढ़ कैसे पहुंचें",
+                            fontWeight = FontWeight.ExtraBold,
+                            fontFamily = FontFamily.Serif,
+                            fontSize = 18.sp,
+                            color = CrimsonSecondary,
+                            letterSpacing = 1.sp
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = SaffronPrimary)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
+            }
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
+                .background(SlateBackgroundLight)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Header Image Banner
+            // Header Image Banner with Royal Card Frame
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(220.dp)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.chittorgarh_fort),
@@ -257,18 +272,18 @@ fun HowToReachScreen(
                         .padding(20.dp)
                 ) {
                     Text(
-                        text = if (isEnglish) "TRAVEL CONCIERGE" else "यात्रा द्वारपाल",
+                        text = if (isEnglish) "ROYAL MEWAR TRAVEL GUIDE" else "शाही मेवाड़ यात्रा गाइड",
                         color = GoldAccent,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp,
+                        letterSpacing = 1.5.sp,
                         fontFamily = FontFamily.Serif
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = if (isEnglish) "How to Reach Chittorgarh" else "चित्तौड़गढ़ आवागमन मार्ग",
+                        text = if (isEnglish) "Transit & Routes" else "आवागमन मार्ग और सूचना",
                         color = Color.White,
-                        fontSize = 22.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Serif
                     )
@@ -277,29 +292,67 @@ fun HowToReachScreen(
 
             Column(
                 modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                // Dynamic Search / Input Panel (Manual override)
+                // Section: Route & Search Panel
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
                     border = BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.25f)),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(20.dp)) {
                         Text(
-                            text = if (isEnglish) "MANUAL ROUTE CALCULATOR" else "मैनुअल मार्ग कैलकुलेटर",
+                            text = if (isEnglish) "SELECT ORIGIN CITY" else "प्रस्थान का शहर चुनें",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = SaffronPrimary,
-                            letterSpacing = 1.sp
+                            letterSpacing = 1.sp,
+                            fontFamily = FontFamily.Serif
                         )
                         Spacer(modifier = Modifier.height(10.dp))
 
+                        // Quick selection source city chips
+                        val popularCities = listOf("Jaipur", "Udaipur", "Delhi", "Mumbai", "Ahmedabad", "Agra")
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(bottom = 12.dp)
+                        ) {
+                            items(popularCities) { city ->
+                                val isSelected = useManualSearch && manualCityInput.equals(city, ignoreCase = true)
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(if (isSelected) SaffronPrimary else SaffronPrimary.copy(alpha = 0.08f))
+                                        .border(1.dp, if (isSelected) SaffronPrimary else SaffronPrimary.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                                        .clickable {
+                                            manualCityInput = city
+                                            searchCity(city)
+                                        }
+                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Text(
+                                        text = city,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isSelected) Color.Black else CrimsonSecondary,
+                                        fontSize = 12.sp,
+                                        fontFamily = FontFamily.Serif
+                                    )
+                                }
+                            }
+                        }
+
+                        // Search Input
                         OutlinedTextField(
                             value = manualCityInput,
                             onValueChange = { manualCityInput = it },
-                            label = { Text(text = if (isEnglish) "Enter City (e.g. Agra, Delhi)" else "शहर का नाम दर्ज करें (उदा. आगरा)") },
+                            placeholder = {
+                                Text(
+                                    text = if (isEnglish) "Type custom city (e.g. Pune, Kota)..." else "शहर का नाम दर्ज करें...",
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                )
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             trailingIcon = {
                                 IconButton(onClick = {
@@ -310,320 +363,383 @@ fun HowToReachScreen(
                                     Icon(Icons.Default.Search, contentDescription = "Search", tint = SaffronPrimary)
                                 }
                             },
-                            shape = RoundedCornerShape(10.dp),
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = SaffronPrimary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                                 focusedLabelColor = SaffronPrimary
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            if (useManualSearch) {
+                        if (useManualSearch) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End
+                            ) {
                                 TextButton(onClick = {
                                     useManualSearch = false
                                     manualCityInput = ""
                                     activeRouteInfo = null
                                 }) {
-                                    Text(text = if (isEnglish) "Reset to GPS" else "जीपीएस पर लौटें", color = CrimsonSecondary)
+                                    Text(
+                                        text = if (isEnglish) "Reset to GPS Location" else "जीपीएस स्थान पर लौटें",
+                                        color = CrimsonSecondary,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.Serif,
+                                        fontSize = 12.sp
+                                    )
                                 }
                             }
                         }
                     }
                 }
 
-                // Distance Output / GPS Panel
+                // Journey Summary Card (Royal Dark Theme)
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(CrimsonSecondary, CrimsonDark)
+                                )
+                            )
+                            .border(1.dp, GoldAccent.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+                            .padding(20.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .background(SaffronPrimary.copy(alpha = 0.12f), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(Icons.Default.LocationOn, contentDescription = null, tint = SaffronPrimary, modifier = Modifier.size(24.dp))
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Column {
+                            Text(
+                                text = if (isEnglish) "ROYAL JOURNEY SUMMARY" else "शाही यात्रा सारांश",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = GoldAccent,
+                                letterSpacing = 1.5.sp,
+                                fontFamily = FontFamily.Serif
+                            )
+                            Spacer(modifier = Modifier.height(14.dp))
 
-                        if (useManualSearch && activeRouteInfo != null) {
-                            Text(
-                                text = if (isEnglish) {
-                                    "From ${activeRouteInfo!!.cityName} to Chittorgarh is ${activeRouteInfo!!.distance}"
-                                } else {
-                                    "${activeRouteInfo!!.cityName} से चित्तौड़गढ़ की दूरी ${activeRouteInfo!!.distance} है"
-                                },
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                fontFamily = FontFamily.Serif,
-                                color = CrimsonSecondary,
-                                textAlign = TextAlign.Center
-                            )
-                        } else if (!hasPermission) {
-                            Text(
-                                text = if (isEnglish) "GPS Disabled / Permission Required" else "जीपीएस अक्षम / अनुमति आवश्यक",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                textAlign = TextAlign.Center
-                            )
-                        } else if (userLocation == null) {
-                            Text(
-                                text = if (isEnglish) "Fetching GPS location..." else "जीपीएस स्थान खोजा जा रहा है...",
-                                fontSize = 14.sp
-                            )
-                        } else if (isInChittorgarh) {
-                            Text(
-                                text = if (isEnglish) "Welcome! You are already in Chittorgarh!" else "स्वागत है! आप पहले से ही चित्तौड़गढ़ में हैं!",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                color = SaffronPrimary,
-                                fontFamily = FontFamily.Serif,
-                                textAlign = TextAlign.Center
-                            )
-                        } else {
-                            Text(
-                                text = if (isEnglish) {
-                                    "You are approx. ${distanceInKm?.toInt()} km away from Chittorgarh (via GPS)"
-                                } else {
-                                    "आप चित्तौड़गढ़ से लगभग ${distanceInKm?.toInt()} किमी दूर हैं (जीपीएस)"
-                                },
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                fontFamily = FontFamily.Serif,
-                                color = CrimsonSecondary,
-                                textAlign = TextAlign.Center
-                            )
+                            val distanceText = if (useManualSearch && activeRouteInfo != null) {
+                                activeRouteInfo!!.distance
+                            } else if (userLocation != null && distanceInKm != null) {
+                                "${distanceInKm.toInt()} km"
+                            } else {
+                                "--"
+                            }
+
+                            val originCity = if (useManualSearch && activeRouteInfo != null) {
+                                activeRouteInfo!!.cityName
+                            } else if (userLocation != null) {
+                                if (isEnglish) "Your Location (GPS)" else "आपकी लोकेशन (GPS)"
+                            } else if (!hasPermission) {
+                                if (isEnglish) "GPS Disabled" else "जीपीएस अक्षम"
+                            } else {
+                                if (isEnglish) "Fetching GPS..." else "जीपीएस खोज..."
+                            }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column {
+                                    Text(
+                                        text = if (isEnglish) "From" else "प्रस्थान बिंदु",
+                                        fontSize = 11.sp,
+                                        color = Color.White.copy(alpha = 0.6f)
+                                    )
+                                    Text(
+                                        text = originCity,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        fontFamily = FontFamily.Serif
+                                    )
+                                }
+
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text(
+                                        text = if (isEnglish) "Distance" else "दूरी",
+                                        fontSize = 11.sp,
+                                        color = Color.White.copy(alpha = 0.6f)
+                                    )
+                                    Text(
+                                        text = distanceText,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = GoldAccent,
+                                        fontFamily = FontFamily.Serif
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Custom Canvas Journey progress bar
+                            Canvas(modifier = Modifier.fillMaxWidth().height(16.dp)) {
+                                val w = size.width
+                                val h = size.height
+
+                                // Draw travel track line
+                                drawLine(
+                                    color = Color.White.copy(alpha = 0.25f),
+                                    start = Offset(12.dp.toPx(), h / 2),
+                                    end = Offset(w - 12.dp.toPx(), h / 2),
+                                    strokeWidth = 2.dp.toPx()
+                                )
+                                // Origin marker dot
+                                drawCircle(
+                                    color = Color.White,
+                                    radius = 5.dp.toPx(),
+                                    center = Offset(12.dp.toPx(), h / 2)
+                                )
+                                // Chittorgarh destination marker dot
+                                drawCircle(
+                                    color = SaffronPrimary,
+                                    radius = 7.dp.toPx(),
+                                    center = Offset(w - 12.dp.toPx(), h / 2)
+                                )
+                                // Glowing current progress dot (centered as representation)
+                                drawCircle(
+                                    color = GoldAccent,
+                                    radius = 4.dp.toPx(),
+                                    center = Offset(w / 2, h / 2)
+                                )
+                            }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = if (isEnglish) "🏁 Start" else "🏁 प्रारंभ",
+                                    fontSize = 10.sp,
+                                    color = Color.White.copy(alpha = 0.6f)
+                                )
+                                Text(
+                                    text = if (isEnglish) "👑 Chittorgarh Fort" else "👑 चित्तौड़गढ़ किला",
+                                    fontSize = 10.sp,
+                                    color = GoldAccent,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
 
-                // Transit options headers
+                // Section: Transit Options Tabs
                 Text(
-                    text = if (isEnglish) "Transit Options" else "आवागमन के साधन",
+                    text = if (isEnglish) "SELECT TRANSIT MODE" else "आवागमन साधन चुनें",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
+                    fontSize = 13.sp,
                     fontFamily = FontFamily.Serif,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = CrimsonSecondary,
+                    letterSpacing = 1.sp
                 )
 
-                // 1. By Air
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .background(SaffronPrimary.copy(alpha = 0.1f), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(text = "✈️", fontSize = 16.sp)
-                            }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = if (isEnglish) "By Air (हवाई मार्ग)" else "हवाई मार्ग द्वारा",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                color = SaffronPrimary,
-                                fontFamily = FontFamily.Serif
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            text = if (useManualSearch && activeRouteInfo != null) {
-                                if (isEnglish) activeRouteInfo!!.airGuideEn else activeRouteInfo!!.airGuideHi
-                            } else {
-                                if (isEnglish) {
-                                    "The nearest airport is Maharana Pratap Airport in Udaipur (UDR), located 90 km away from Chittorgarh. Direct flights connect Udaipur with Delhi, Mumbai, and Jaipur."
-                                } else {
-                                    "निकटतम हवाई अड्डा उदयपुर में महाराणा प्रताप हवाई अड्डा (UDR) है, जो चित्तौड़गढ़ से 90 किमी दूर है। सीधी उड़ानें उदयपुर को दिल्ली, मुंबई और जयपुर से जोड़ती हैं।"
-                                }
-                            },
-                            fontSize = 13.sp,
-                            lineHeight = 18.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
+                val modes = listOf(
+                    "✈️ " + (if (isEnglish) "By Air" else "हवाई मार्ग"),
+                    "🚂 " + (if (isEnglish) "By Rail" else "रेल मार्ग"),
+                    "🚗 " + (if (isEnglish) "By Road" else "सड़क मार्ग")
+                )
 
-                        // Flight Booking Direct Action Link
-                        Button(
-                            onClick = {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/travel/flights"))
-                                context.startActivity(intent)
-                            },
-                            modifier = Modifier.fillMaxWidth().height(38.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = SaffronPrimary)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(SaffronPrimary.copy(alpha = 0.08f))
+                        .border(1.dp, SaffronPrimary.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    modes.forEachIndexed { index, modeLabel ->
+                        val isSelected = selectedMode == index
+                        val bgCol by animateColorAsState(
+                            targetValue = if (isSelected) SaffronPrimary else Color.Transparent,
+                            label = "modeBg"
+                        )
+                        val txtCol by animateColorAsState(
+                            targetValue = if (isSelected) Color.Black else CrimsonSecondary,
+                            label = "modeTxt"
+                        )
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(bgCol)
+                                .clickable { selectedMode = index }
+                                .padding(vertical = 10.dp),
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = if (isEnglish) "Search Flights to Udaipur (UDR)" else "उदयपुर के लिए उड़ानें खोजें",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
+                                text = modeLabel,
+                                fontWeight = FontWeight.Bold,
+                                color = txtCol,
+                                fontFamily = FontFamily.Serif,
+                                fontSize = 12.sp
                             )
                         }
                     }
                 }
 
-                // 2. By Train
+                // Details Card for selected Transit Mode
+                val route = activeRouteInfo ?: TransitRoute(
+                    cityName = "Jaipur",
+                    distance = "310 km",
+                    airGuideEn = "The nearest airport is Maharana Pratap Airport in Udaipur (UDR), located 90 km away from Chittorgarh. Direct flights connect Udaipur with Delhi, Mumbai, and Jaipur.",
+                    airGuideHi = "निकटतम हवाई अड्डा उदयपुर में महाराणा प्रताप हवाई अड्डा (UDR) है, जो चित्तौड़गढ़ से 90 किमी दूर है। सीधी उड़ानें उदयपुर को दिल्ली, मुंबई और जयपुर से जोड़ती हैं।",
+                    railGuideEn = "Chittorgarh Junction (COR) is a major railway station connecting directly with metro cities across India. Superfast trains operate daily from Delhi, Jaipur, Ahmedabad, Mumbai, and Kota.",
+                    railGuideHi = "चित्तौड़गढ़ जंक्शन (COR) भारत भर के मेट्रो शहरों से सीधे जुड़ने वाला एक प्रमुख रेलवे स्टेशन है। सुपरफास्ट ट्रेनें (जैसे मेवाड़ एक्सप्रेस) दिल्ली, जयपुर, अहमदाबाद, मुंबई और कोटा से प्रतिदिन चलती हैं।",
+                    roadGuideEn = "Located on the Golden Quadrilateral highway network (NH 48), Chittorgarh is easily accessible from Jaipur (320 km), Ahmedabad (380 km), and Udaipur (115 km).",
+                    roadGuideHi = "स्वर्णिम चतुर्भुज राजमार्ग नेटवर्क (NH 48) पर स्थित, चित्तौड़गढ़ जयपुर (320 किमी), अहमदाबाद (380 किमी) और उदयपुर (115 किमी) से आसानी से सुलभ है।",
+                    mapUrl = "https://www.google.com/maps/dir/?api=1&destination=Chittorgarh+Fort"
+                )
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.2f)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .background(CrimsonSecondary.copy(alpha = 0.1f), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(text = "🚂", fontSize = 16.sp)
-                            }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = if (isEnglish) "By Train (रेल मार्ग)" else "रेल मार्ग द्वारा",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                color = CrimsonSecondary,
-                                fontFamily = FontFamily.Serif
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            text = if (useManualSearch && activeRouteInfo != null) {
-                                if (isEnglish) activeRouteInfo!!.railGuideEn else activeRouteInfo!!.railGuideHi
-                            } else {
-                                if (isEnglish) {
-                                    "Chittorgarh Junction (COR) is a major railway station connecting directly with metro cities across India. Superfast trains operate daily from Delhi, Jaipur, Ahmedabad, Mumbai, and Kota."
-                                } else {
-                                    "चित्तौड़गढ़ जंक्शन (COR) भारत भर के मेट्रो शहरों से सीधे जुड़ने वाला एक प्रमुख रेलवे स्टेशन है। सुपरफास्ट ट्रेनें (जैसे मेवाड़ एक्सप्रेस) दिल्ली, जयपुर, अहमदाबाद, मुंबई और कोटा से प्रतिदिन चलती हैं।"
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        when (selectedMode) {
+                            0 -> { // Air
+                                Text(
+                                    text = if (isEnglish) "FLIGHT & AIRPORT GUIDE" else "हवाई यात्रा मार्गदर्शिका",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SaffronPrimary,
+                                    letterSpacing = 1.sp,
+                                    fontFamily = FontFamily.Serif
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(
+                                    text = if (isEnglish) route.airGuideEn else route.airGuideHi,
+                                    fontSize = 14.sp,
+                                    lineHeight = 20.sp,
+                                    color = Color.Black.copy(alpha = 0.8f),
+                                    fontFamily = FontFamily.Serif
+                                )
+                                Spacer(modifier = Modifier.height(20.dp))
+                                Button(
+                                    onClick = {
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/travel/flights"))
+                                        context.startActivity(intent)
+                                    },
+                                    modifier = Modifier.fillMaxWidth().height(44.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = SaffronPrimary)
+                                ) {
+                                    Text(
+                                        text = if (isEnglish) "Search Flights to Udaipur (UDR)" else "उदयपुर के लिए उड़ानें खोजें",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Black
+                                    )
                                 }
-                            },
-                            fontSize = 13.sp,
-                            lineHeight = 18.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // IRCTC Direct Action Link
-                        Button(
-                            onClick = {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.irctc.co.in/"))
-                                context.startActivity(intent)
-                            },
-                            modifier = Modifier.fillMaxWidth().height(38.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = CrimsonSecondary)
-                        ) {
-                            Text(
-                                text = if (isEnglish) "Book Train Tickets on IRCTC" else "IRCTC पर ट्रेन टिकट बुक करें",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            }
+                            1 -> { // Rail
+                                Text(
+                                    text = if (isEnglish) "TRAIN & JUNCTION GUIDE" else "रेल यात्रा मार्गदर्शिका",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = CrimsonSecondary,
+                                    letterSpacing = 1.sp,
+                                    fontFamily = FontFamily.Serif
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(
+                                    text = if (isEnglish) route.railGuideEn else route.railGuideHi,
+                                    fontSize = 14.sp,
+                                    lineHeight = 20.sp,
+                                    color = Color.Black.copy(alpha = 0.8f),
+                                    fontFamily = FontFamily.Serif
+                                )
+                                Spacer(modifier = Modifier.height(20.dp))
+                                Button(
+                                    onClick = {
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.irctc.co.in/"))
+                                        context.startActivity(intent)
+                                    },
+                                    modifier = Modifier.fillMaxWidth().height(44.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = CrimsonSecondary)
+                                ) {
+                                    Text(
+                                        text = if (isEnglish) "Book Train Tickets on IRCTC" else "IRCTC पर ट्रेन टिकट बुक करें",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                            2 -> { // Road
+                                Text(
+                                    text = if (isEnglish) "ROADWAY & HIGHWAY GUIDE" else "सड़क यात्रा मार्गदर्शिका",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF2E7D32),
+                                    letterSpacing = 1.sp,
+                                    fontFamily = FontFamily.Serif
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(
+                                    text = if (isEnglish) route.roadGuideEn else route.roadGuideHi,
+                                    fontSize = 14.sp,
+                                    lineHeight = 20.sp,
+                                    color = Color.Black.copy(alpha = 0.8f),
+                                    fontFamily = FontFamily.Serif
+                                )
+                                Spacer(modifier = Modifier.height(20.dp))
+                                Button(
+                                    onClick = {
+                                        val url = if (useManualSearch && activeRouteInfo != null) {
+                                            activeRouteInfo!!.mapUrl
+                                        } else {
+                                            "https://www.google.com/maps/dir/?api=1&destination=Chittorgarh+Fort"
+                                        }
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                        context.startActivity(intent)
+                                    },
+                                    modifier = Modifier.fillMaxWidth().height(44.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
+                                ) {
+                                    Text(
+                                        text = if (isEnglish) "Open Route in Google Maps" else "गूगल मैप्स में मार्ग खोलें",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                }
+                            }
                         }
                     }
                 }
 
-                // 3. By Road
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .background(Color(0xFF4CAF50).copy(alpha = 0.1f), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(text = "🚗", fontSize = 16.sp)
-                            }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = if (isEnglish) "By Road (सड़क मार्ग)" else "सड़क मार्ग द्वारा",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                color = Color(0xFF4CAF50),
-                                fontFamily = FontFamily.Serif
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            text = if (useManualSearch && activeRouteInfo != null) {
-                                if (isEnglish) activeRouteInfo!!.roadGuideEn else activeRouteInfo!!.roadGuideHi
-                            } else {
-                                if (isEnglish) {
-                                    "Located on the Golden Quadrilateral highway network (NH 48), Chittorgarh is easily accessible from Jaipur (320 km), Ahmedabad (380 km), and Udaipur (115 km)."
-                                } else {
-                                    "स्वर्णिम चतुर्भुज राजमार्ग नेटवर्क (NH 48) पर स्थित, चित्तौड़गढ़ जयपुर (320 किमी), अहमदाबाद (380 किमी) और उदयपुर (115 किमी) से आसानी से सुलभ है।"
-                                }
-                            },
-                            fontSize = 13.sp,
-                            lineHeight = 18.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                        // Google Maps Direct Route Direction Link
-                        Button(
-                            onClick = {
-                                val url = if (useManualSearch && activeRouteInfo != null) {
-                                    activeRouteInfo!!.mapUrl
-                                } else {
-                                    "https://www.google.com/maps/dir/?api=1&destination=Chittorgarh+Fort"
-                                }
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                                context.startActivity(intent)
-                            },
-                            modifier = Modifier.fillMaxWidth().height(38.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
-                        ) {
-                            Text(
-                                text = if (isEnglish) "Open Route in Google Maps" else "गूगल मैप्स में मार्ग खोलें",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Close Button
+                // Dashboard Return Button
                 Button(
                     onClick = onBackClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = CrimsonDark),
                     border = BorderStroke(1.dp, GoldAccent.copy(alpha = 0.3f))
                 ) {
                     Text(
                         text = if (isEnglish) "Return to Dashboard" else "डैशबोर्ड पर लौटें",
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Serif
+                        fontFamily = FontFamily.Serif,
+                        color = Color.White
                     )
                 }
             }

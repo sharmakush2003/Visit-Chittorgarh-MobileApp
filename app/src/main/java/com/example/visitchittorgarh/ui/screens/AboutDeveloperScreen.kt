@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -15,10 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,16 +25,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.visitchittorgarh.R
 import com.example.visitchittorgarh.theme.CrimsonDark
 import com.example.visitchittorgarh.theme.CrimsonSecondary
 import com.example.visitchittorgarh.theme.GoldAccent
 import com.example.visitchittorgarh.theme.SaffronPrimary
+import com.example.visitchittorgarh.theme.SlateBackgroundLight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,33 +49,40 @@ fun AboutDeveloperScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = if (isEnglish) "About the Developers" else "विकासकर्ताओं के बारे में",
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Serif,
-                        fontSize = 20.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = SaffronPrimary)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
-            )
+            Surface(
+                tonalElevation = 6.dp,
+                shadowElevation = 6.dp,
+                color = SlateBackgroundLight
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = if (isEnglish) "ABOUT THE DEVELOPERS" else "विकासकर्ताओं की जानकारी",
+                            fontWeight = FontWeight.ExtraBold,
+                            fontFamily = FontFamily.Serif,
+                            fontSize = 18.sp,
+                            color = CrimsonSecondary,
+                            letterSpacing = 1.sp
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = SaffronPrimary)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
+            }
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
+                .background(SlateBackgroundLight)
                 .verticalScroll(rememberScrollState())
         ) {
-            // ChittorTech Logo & Subtitle Banner
+            // ChittorTech Logo & Brand Banner
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -84,22 +92,22 @@ fun AboutDeveloperScreen(
                         )
                     )
                     .border(BorderStroke(0.5.dp, GoldAccent.copy(alpha = 0.3f)))
-                    .padding(vertical = 32.dp, horizontal = 24.dp)
+                    .padding(vertical = 36.dp, horizontal = 24.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                     Box(
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(90.dp)
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f), CircleShape)
-                            .border(1.5.dp, GoldAccent, CircleShape),
+                            .background(Color.White.copy(alpha = 0.08f), CircleShape)
+                            .border(2.dp, GoldAccent, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         AsyncImage(
                             model = "https://chittortech.online/logo.png",
                             contentDescription = "ChittorTech Logo",
                             modifier = Modifier
-                                .size(60.dp)
+                                .size(70.dp)
                                 .clip(CircleShape)
                         )
                     }
@@ -107,235 +115,336 @@ fun AboutDeveloperScreen(
                     Text(
                         text = "ChittorTech",
                         color = GoldAccent,
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.ExtraBold,
                         fontFamily = FontFamily.Serif,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = if (isEnglish) "Best IT Startup in Chittorgarh" else "चित्तौड़गढ़ का सर्वश्रेष्ठ आईटी स्टार्टअप",
-                        color = Color.White.copy(alpha = 0.8f),
+                        text = if (isEnglish) "🏆 Best IT Startup in Chittorgarh" else "🏆 चित्तौड़गढ़ का सर्वश्रेष्ठ आईटी स्टार्टअप",
+                        color = Color.White.copy(alpha = 0.85f),
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.SansSerif,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        letterSpacing = 0.5.sp
                     )
                 }
             }
 
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                // Intro Card
+                // Intro Text Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.2f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(18.dp)) {
                         Text(
                             text = if (isEnglish) {
-                                "ChittorTech is a leading IT company and web development agency based in Chittorgarh, Rajasthan. We engineer premium websites, SaaS enterprise applications, custom AI Chatbots (RAG), and high-performance native mobile apps built on Expo and Kotlin."
+                                "ChittorTech is Rajasthan's recognized, premier travel-tech developer and software engineering team based in Chittorgarh. We develop high-speed cloud infrastructures, robust SaaS suites, professional e-commerce operations, and native mobile apps built on Jetpack Compose and Kotlin."
                             } else {
-                                "चित्तौड़टेक चित्तौड़गढ़, राजस्थान में स्थित एक प्रमुख आईटी कंपनी और वेब डेवलपमेंट एजेंसी है। हम प्रीमियम वेबसाइट्स, एंटरप्राइज सॉफ्टवेयर (SaaS), कस्टम AI चैटबॉट्स और फ्लूइड मोबाइल ऐप्स बनाते हैं।"
+                                "चित्तौड़टेक राजस्थान की मान्यता प्राप्त, प्रमुख ट्रैवल-टेक डेवलपर और सॉफ्टवेयर इंजीनियरिंग टीम है जो चित्तौड़गढ़ में स्थित है। हम हाई-स्पीड क्लाउड इंफ्रास्ट्रक्चर, SaaS सुइट्स, ई-कॉमर्स सिस्टम और जेटपैक कंपोज़ और कोटलिन में बने ऐप्स विकसित करते हैं।"
                             },
                             fontSize = 14.sp,
-                            lineHeight = 20.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                            lineHeight = 22.sp,
+                            color = Color.Black.copy(alpha = 0.8f),
+                            fontFamily = FontFamily.Serif
                         )
                     }
                 }
 
-                // iStart & Startup India Badges
+                // Startup Credentials Badges
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Card(
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.3f))
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        border = BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.3f)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "iStart Rajasthan",
+                                    fontWeight = FontWeight.Bold,
+                                    color = SaffronPrimary,
+                                    fontSize = 12.sp,
+                                    fontFamily = FontFamily.Serif
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(Icons.Default.Check, null, tint = SaffronPrimary, modifier = Modifier.size(14.dp))
+                            }
+                            Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "iStart Rajasthan",
-                                fontWeight = FontWeight.Bold,
-                                color = SaffronPrimary,
-                                fontSize = 12.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Bronze Card Rating\nStartup ID: 05F896CE",
+                                text = "Bronze Rating\nStartup ID: 05F896CE",
                                 fontSize = 10.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.Black.copy(alpha = 0.6f),
+                                lineHeight = 14.sp
                             )
                         }
                     }
 
                     Card(
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(1.dp, CrimsonSecondary.copy(alpha = 0.3f))
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        border = BorderStroke(1.dp, CrimsonSecondary.copy(alpha = 0.3f)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "Startup India",
+                                    fontWeight = FontWeight.Bold,
+                                    color = CrimsonSecondary,
+                                    fontSize = 12.sp,
+                                    fontFamily = FontFamily.Serif
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(Icons.Default.Check, null, tint = CrimsonSecondary, modifier = Modifier.size(14.dp))
+                            }
+                            Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Startup India",
-                                fontWeight = FontWeight.Bold,
-                                color = CrimsonSecondary,
-                                fontSize = 12.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "DPIIT Recognized\nBhaskar ID: IN-0426-9449SG",
+                                text = "DPIIT Recognized\nBhaskar ID:\nIN-0426-9449SG",
                                 fontSize = 10.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.Black.copy(alpha = 0.6f),
+                                lineHeight = 14.sp
                             )
                         }
                     }
                 }
 
-                // Section: Team Leadership
+                // Section Title: Founders
                 Text(
-                    text = if (isEnglish) "Meet the Founders" else "संस्थापक टीम",
+                    text = if (isEnglish) "MEET THE FOUNDERS" else "संस्थापक टीम से मिलें",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    fontSize = 13.sp,
                     fontFamily = FontFamily.Serif,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = CrimsonSecondary,
+                    letterSpacing = 1.sp
                 )
 
-                // Kush Profile
+                // Founder: Kush Sharma
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.15f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Person, contentDescription = null, tint = SaffronPrimary)
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(54.dp)
+                                    .clip(CircleShape)
+                                    .background(SaffronPrimary.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("KS", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = CrimsonSecondary, fontFamily = FontFamily.Serif)
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
                             Column {
-                                Text("Kush Sharma", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                                Text(if (isEnglish) "Founder & Software Engineer" else "संस्थापक और सॉफ्टवेयर इंजीनियर", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                Text(
+                                    text = "Kush Sharma",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                    fontFamily = FontFamily.Serif,
+                                    color = CrimsonSecondary
+                                )
+                                Text(
+                                    text = if (isEnglish) "Founder & Principal Software Engineer" else "संस्थापक और सॉफ्टवेयर इंजीनियर",
+                                    fontSize = 11.sp,
+                                    color = Color.Black.copy(alpha = 0.5f),
+                                    fontWeight = FontWeight.SemiBold
+                                )
                             }
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = if (isEnglish) {
-                                "A software engineer and GenAI specialist, B.Tech IT graduate from JECRC Foundation (8.90 CGPA). Expert in Generative AI, LangChain, Node.js, and MongoDB. Built complex RAG systems and digital tourism structures."
+                                "Kush is a Principal Software Engineer & GenAI specialist, holding a B.Tech in IT from JECRC Foundation (8.90 CGPA). Expert in Generative AI, RAG architecture, Node.js backend systems, and native mobile apps."
                             } else {
-                                "एक सॉफ्टवेयर इंजीनियर और GenAI विशेषज्ञ, JECRC फाउंडेशन (8.90 CGPA) से बी.टेक आईटी स्नातक। जेनेरेटिव एआई, LangChain, नोड.जेएस और मोंगोडीबी के विशेषज्ञ।"
+                                "कुश एक सॉफ्टवेयर इंजीनियर और GenAI विशेषज्ञ हैं, जिन्होंने JECRC फाउंडेशन (8.90 CGPA) से IT में बी.टेक किया है। जेनेरेटिव एआई, मोंगोडीबी और मोबाइल डेवलपमेंट के विशेषज्ञ।"
                             },
                             fontSize = 12.sp,
                             lineHeight = 18.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            color = Color.Black.copy(alpha = 0.7f),
+                            fontFamily = FontFamily.Serif
                         )
                     }
                 }
 
-                // Lav Profile
+                // Founder: Lav Sharma
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, CrimsonSecondary.copy(alpha = 0.15f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Person, contentDescription = null, tint = CrimsonSecondary)
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(54.dp)
+                                    .clip(CircleShape)
+                                    .background(CrimsonSecondary.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("LS", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = SaffronPrimary, fontFamily = FontFamily.Serif)
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
                             Column {
-                                Text("Lav Sharma", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                                Text(if (isEnglish) "Co-Founder & Lead AI Developer" else "सह-संस्थापक और मुख्य एआई डेवलपर", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                Text(
+                                    text = "Lav Sharma",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                    fontFamily = FontFamily.Serif,
+                                    color = CrimsonSecondary
+                                )
+                                Text(
+                                    text = if (isEnglish) "Co-Founder & Lead Technical Architect" else "सह-संस्थापक और मुख्य तकनीकी आर्किटेक्ट",
+                                    fontSize = 11.sp,
+                                    color = Color.Black.copy(alpha = 0.5f),
+                                    fontWeight = FontWeight.SemiBold
+                                )
                             }
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = if (isEnglish) {
-                                "Co-founder and lead AI Full-Stack Developer, B.Tech IT graduate from JECRC Foundation (8.52 CGPA). Specializes in complete web/SaaS architecture, Express.js, Node.js, and high-performance databases."
+                                "Lav is a Co-founder and lead technical architect, holding a B.Tech in IT from JECRC Foundation (8.52 CGPA). Specializes in complete web/SaaS architecture, Express.js backend scaling, and high-performance cloud databases."
                             } else {
-                                "सह-संस्थापक और मुख्य एआई फुल-स्टैक डेवलपर, JECRC फाउंडेशन (8.52 CGPA) से बी.टेक आईटी स्नातक। वेब/SaaS आर्किटेक्चर, नोड.जेएस और मोंगोडीबी के विशेषज्ञ।"
+                                "लव सह-संस्थापक और मुख्य तकनीकी आर्किटेक्ट हैं, जिन्होंने JECRC फाउंडेशन (8.52 CGPA) से IT में बी.टेक किया है। क्लाउड आर्किटेक्चर, नोड.जेएस और बड़ी डेटाबेस प्रणालियों के विशेषज्ञ।"
                             },
                             fontSize = 12.sp,
                             lineHeight = 18.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            color = Color.Black.copy(alpha = 0.7f),
+                            fontFamily = FontFamily.Serif
                         )
                     }
                 }
 
-                // Section: Projects
+                // Section Title: Projects
                 Text(
-                    text = if (isEnglish) "Our Digital Projects" else "हमारे डिजिटल प्रोजेक्ट्स",
+                    text = if (isEnglish) "DIGITAL PORTFOLIO" else "हमारे मुख्य प्रोजेक्ट्स",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    fontSize = 13.sp,
                     fontFamily = FontFamily.Serif,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = CrimsonSecondary,
+                    letterSpacing = 1.sp
                 )
 
-                // Project List
+                // Projects List (with Emojis and premium design)
                 val projects = listOf(
                     Triple(
-                        "Visit Chittorgarh App",
+                        "Visit Chittorgarh Mobile App",
                         "A premium travel-tech mobile application and digital concierge portal built with Jetpack Compose, Kotlin, and Firebase. It offers seamless native pass generation, direct tour package bookings, and real-time vendor management without middleman commissions, empowering local tourism.",
-                        "Active"
+                        "📱"
                     ),
                     Triple(
-                        "Mewari Achaar App",
+                        "Mewari Achaar E-Commerce",
                         "A fluid Android e-commerce application built in native Kotlin, designed to digitize traditional food delivery. It features high-performance 60FPS Lottie vector animation modules, highly responsive Firestore databases, background data sync routines, and secure Google Sign-in protocols.",
-                        "Active"
+                        "🍯"
                     ),
                     Triple(
                         "Digify Gift Shop Portal",
                         "A robust corporate multi-vendor e-commerce platform and customer CRM suite built using Next.js, Node.js, Express, and MongoDB. It integrates automatic inventory sync, multi-currency payment nodes, order processing pipelines, and secure analytics dashboards.",
-                        "Active"
+                        "🎁"
                     ),
                     Triple(
                         "SaaS Enterprise & AI Solutions",
                         "Tailor-made cloud architectures, enterprise customer dashboards, custom AI Chatbots (RAG), and digital automation workflows. Engineered on Next.js, Node.js, and MongoDB, these systems streamline operations, enhance client interaction, and process big data securely.",
-                        "Active"
+                        "☁️"
                     ),
                     Triple(
                         "Business & Corporate Web Portals",
                         "High-performance, pixel-perfect, and mobile-responsive website systems engineered for corporate brands, educational bodies, and local startups. Optimised for speed, SEO rankings, Google schema markup, and multi-channel customer lead generation.",
-                        "Active"
+                        "🌐"
                     )
                 )
 
                 projects.forEach { proj ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        border = BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.12f)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
+                        Column(modifier = Modifier.padding(16.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text(proj.first, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Badge(containerColor = SaffronPrimary.copy(alpha = 0.2f), contentColor = SaffronPrimary) {
-                                    Text(proj.third, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .background(SaffronPrimary.copy(alpha = 0.08f), CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(proj.third, fontSize = 16.sp)
+                                    }
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        text = proj.first,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp,
+                                        fontFamily = FontFamily.Serif,
+                                        color = CrimsonSecondary
+                                    )
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(Color(0xFFE8F5E9))
+                                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = if (isEnglish) "ACTIVE" else "सक्रिय",
+                                        color = Color(0xFF2E7D32),
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 }
                             }
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(proj.second, fontSize = 11.sp, lineHeight = 16.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = proj.second,
+                                fontSize = 12.sp,
+                                lineHeight = 18.sp,
+                                color = Color.Black.copy(alpha = 0.65f),
+                                fontFamily = FontFamily.Serif
+                            )
                         }
                     }
                 }
 
-                // helplines
+                // Helpdesk Panel
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(20.dp),
                     border = BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.25f)),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f))
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
@@ -344,17 +453,18 @@ fun AboutDeveloperScreen(
                             fontWeight = FontWeight.Bold,
                             color = CrimsonSecondary,
                             fontFamily = FontFamily.Serif,
-                            letterSpacing = 1.sp
+                            letterSpacing = 1.5.sp
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = if (isEnglish) "Direct lines for support and project queries" else "सपोर्ट और नए प्रोजेक्ट के प्रश्नों के लिए सीधी लाइनें",
+                            text = if (isEnglish) "Direct lines for support and project queries" else "सपोर्ट और नए प्रोजेक्ट के लिए सीधी हेल्पडेस्क लाइन्स",
                             fontSize = 10.sp,
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            color = Color.Black.copy(alpha = 0.5f),
+                            fontWeight = FontWeight.SemiBold
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(18.dp))
 
                         // WhatsApp Chat Button
                         Button(
@@ -369,7 +479,7 @@ fun AboutDeveloperScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(44.dp),
-                            shape = RoundedCornerShape(10.dp),
+                            shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366))
                         ) {
                             Text(
@@ -380,12 +490,12 @@ fun AboutDeveloperScreen(
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         // Call & Email Row
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             OutlinedButton(
                                 onClick = {
@@ -395,13 +505,13 @@ fun AboutDeveloperScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(44.dp),
-                                shape = RoundedCornerShape(10.dp),
+                                shape = RoundedCornerShape(12.dp),
                                 border = BorderStroke(1.dp, CrimsonSecondary),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = CrimsonSecondary)
                             ) {
                                 Icon(Icons.Default.Call, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = if (isEnglish) "Call" else "कॉल", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(text = if (isEnglish) "Call Us" else "कॉल करें", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
 
                             OutlinedButton(
@@ -415,27 +525,27 @@ fun AboutDeveloperScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(44.dp),
-                                shape = RoundedCornerShape(10.dp),
+                                shape = RoundedCornerShape(12.dp),
                                 border = BorderStroke(1.dp, SaffronPrimary),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = SaffronPrimary)
                             ) {
                                 Icon(Icons.Default.Email, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = if (isEnglish) "Email" else "ईमेल", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(text = if (isEnglish) "Email Us" else "ईमेल करें", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                // Close Button
+                // Dashboard Return Button
                 Button(
                     onClick = onBackClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = CrimsonSecondary),
                     border = BorderStroke(1.dp, GoldAccent.copy(alpha = 0.3f))
                 ) {
@@ -443,7 +553,8 @@ fun AboutDeveloperScreen(
                         text = if (isEnglish) "Return to Dashboard" else "डैशबोर्ड पर लौटें",
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Serif,
-                        fontSize = 14.sp
+                        fontSize = 14.sp,
+                        color = Color.White
                     )
                 }
             }

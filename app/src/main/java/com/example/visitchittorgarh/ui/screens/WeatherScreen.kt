@@ -453,52 +453,58 @@ fun WeatherScreen(
             weather != null -> WeatherContent(weather!!, isEnglish, hourOfDay)
         }
 
-        // Top bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        // Fixed Top Bar with solid background matching the sky gradient top to prevent clashing during scroll
+        Surface(
+            color = gradient.first(),
+            modifier = Modifier.fillMaxWidth(),
+            shadowElevation = 4.dp
         ) {
-            IconButton(onClick = onBackClick) {
-                Icon(Icons.Default.ArrowBack, null, tint = Color.White)
-            }
-            Spacer(modifier = Modifier.width(6.dp))
-            Column(
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable { showSearchDialog = true }
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onBackClick) {
+                    Icon(Icons.Default.ArrowBack, null, tint = Color.White)
+                }
+                Spacer(modifier = Modifier.width(6.dp))
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { showSearchDialog = true }
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "📍 ${if (isEnglish) selectedLocation.nameEn else selectedLocation.nameHi}",
+                            color = Color.White, fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp, fontFamily = FontFamily.Serif
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Select City",
+                            tint = Color.White.copy(alpha = 0.8f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                     Text(
-                        text = "📍 ${if (isEnglish) selectedLocation.nameEn else selectedLocation.nameHi}",
-                        color = Color.White, fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp, fontFamily = FontFamily.Serif
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Select City",
-                        tint = Color.White.copy(alpha = 0.8f),
-                        modifier = Modifier.size(16.dp)
+                        text = if (isEnglish) "Tap to change district" else "जिला बदलने के लिए टैप करें",
+                        color = SaffronPrimary,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
-                Text(
-                    text = if (isEnglish) "Tap to change district" else "जिला बदलने के लिए टैप करें",
-                    color = SaffronPrimary,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-            IconButton(onClick = { refreshTrigger++ }) {
-                Icon(
-                    Icons.Default.Refresh, null,
-                    tint = Color.White.copy(alpha = 0.8f),
-                    modifier = if (isLoading) Modifier.rotate(spinDeg) else Modifier
-                )
+                IconButton(onClick = { refreshTrigger++ }) {
+                    Icon(
+                        Icons.Default.Refresh, null,
+                        tint = Color.White.copy(alpha = 0.8f),
+                        modifier = if (isLoading) Modifier.rotate(spinDeg) else Modifier
+                    )
+                }
             }
         }
 
@@ -661,7 +667,7 @@ private fun ErrorState(isEnglish: Boolean, onRetry: () -> Unit) {
 private fun WeatherContent(w: WeatherData, isEnglish: Boolean, hourOfDay: Int) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(top = 72.dp, bottom = 48.dp)
+        contentPadding = PaddingValues(top = 84.dp, bottom = 48.dp) // Added slightly more top padding so content scrolls completely below top bar
     ) {
 
         // ── HERO: Big temperature ──────────────────────────────────────────
@@ -761,7 +767,7 @@ private fun WeatherContent(w: WeatherData, isEnglish: Boolean, hourOfDay: Int) {
                         emoji = "🔵", title = if (isEnglish) "PRESSURE" else "दबाव",
                         value = "${w.pressure.toInt()} hPa",
                         sub = if (isEnglish) when { w.pressure > 1013 -> "High pressure" ; else -> "Low pressure" }
-                              else when { w.pressure > 1013 -> "उच्च दबाव" ; else -> "कम दबाव" },
+                              else when { w.pressure > 1013 -> "कम दबाव" ; else -> "उच्च दबाव" },
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(

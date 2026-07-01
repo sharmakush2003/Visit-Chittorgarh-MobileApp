@@ -99,11 +99,7 @@ fun MainScreen(
                     modifier = Modifier
                         .fillMaxHeight()
                         .width(320.dp)
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(Color(0xFF0F2038), Color(0xFF050A1A))
-                            )
-                        )
+                        .background(SlateBackgroundLight)
                         .border(
                             BorderStroke(1.dp, SaffronPrimary.copy(alpha = 0.3f)),
                             RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
@@ -164,183 +160,99 @@ fun MainScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Navigation Drawer Items with Serif font style
-                        val menuItems = listOf(
-                            Triple(0, Icons.Default.Home, if (isEnglish) "Home Dashboard" else "होम डैशबोर्ड")
+                        // Home Dashboard block item
+                        DrawerBubbleItem(
+                            icon = { Icon(Icons.Default.Home, contentDescription = null, tint = if (selectedTab == 0) CrimsonSecondary else SaffronPrimary) },
+                            label = if (isEnglish) "Home Dashboard" else "होम डैशबोर्ड",
+                            selected = selectedTab == 0,
+                            onClick = {
+                                selectedTab = 0
+                                scope.launch { drawerState.close() }
+                            }
                         )
 
-                        menuItems.forEach { (index, icon, label) ->
-                            NavigationDrawerItem(
-                                label = { 
-                                    Text(
-                                        text = label, 
-                                        fontWeight = FontWeight.SemiBold, 
-                                        fontFamily = FontFamily.Serif,
-                                        fontSize = 14.sp
-                                    ) 
-                                },
-                                selected = selectedTab == index,
-                                onClick = {
-                                    selectedTab = index
-                                    scope.launch { drawerState.close() }
-                                },
-                                icon = { Icon(icon, contentDescription = null, tint = if (selectedTab == index) GoldAccent else Color.White.copy(alpha = 0.7f)) },
-                                colors = NavigationDrawerItemDefaults.colors(
-                                    selectedContainerColor = SaffronPrimary.copy(alpha = 0.25f),
-                                    selectedTextColor = GoldAccent,
-                                    unselectedTextColor = Color.White.copy(alpha = 0.85f)
-                                ),
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-                            )
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                            color = SaffronPrimary.copy(alpha = 0.2f)
+                        )
+
+                        // Auth / Profile block item
+                        val isSigned = currentUserState != null
+                        val authLabel = if (!isSigned) {
+                            if (isEnglish) "Sign In / Register" else "साइन इन / रजिस्टर"
+                        } else {
+                            val nameStr = currentUserState?.displayName ?: currentUserState?.email ?: ""
+                            if (isEnglish) "Sign Out ($nameStr)" else "साइन आउट ($nameStr)"
                         }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = SaffronPrimary.copy(alpha = 0.2f))
-                        
-
-                        // Auth / Profile Item
-                        NavigationDrawerItem(
-                            label = { 
-                                Text(
-                                    text = if (currentUserState == null) {
-                                        if (isEnglish) "Sign In / Register" else "साइन इन / रजिस्टर"
-                                    } else {
-                                        val nameStr = currentUserState?.displayName ?: currentUserState?.email ?: ""
-                                        if (isEnglish) "Sign Out ($nameStr)" else "साइन आउट ($nameStr)"
-                                    }, 
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Serif,
-                                    fontSize = 14.sp
-                                ) 
-                            },
+                        DrawerBubbleItem(
+                            icon = { Icon(Icons.Default.Person, contentDescription = null, tint = SaffronPrimary) },
+                            label = authLabel,
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
-                                if (currentUserState == null) {
+                                if (!isSigned) {
                                     onAuthClick()
                                 } else {
                                     com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
                                     Toast.makeText(context, if (isEnglish) "Signed out successfully" else "सफलतापूर्वक साइन आउट किया गया", Toast.LENGTH_SHORT).show()
                                 }
-                            },
-                            icon = { Icon(Icons.Default.Person, contentDescription = null, tint = SaffronPrimary) },
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                            colors = NavigationDrawerItemDefaults.colors(
-                                unselectedTextColor = Color.White.copy(alpha = 0.9f)
-                            )
+                            }
                         )
 
-                        // About Chittorgarh item
-                        NavigationDrawerItem(
-                            label = { 
-                                Text(
-                                    text = if (isEnglish) "About Chittorgarh" else "चित्तौड़गढ़ के बारे में", 
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Serif,
-                                    fontSize = 14.sp
-                                ) 
-                            },
+                        // About Chittorgarh block item
+                        DrawerBubbleItem(
+                            icon = { Icon(Icons.Default.Info, contentDescription = null, tint = SaffronPrimary) },
+                            label = if (isEnglish) "About Chittorgarh" else "चित्तौड़गढ़ के बारे में",
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
                                 onAboutChittorgarhClick()
-                            },
-                            icon = { Icon(Icons.Default.Info, contentDescription = null, tint = SaffronPrimary) },
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                            colors = NavigationDrawerItemDefaults.colors(
-                                unselectedTextColor = Color.White.copy(alpha = 0.9f)
-                            )
+                            }
                         )
 
-                        // About Developers item
-                        NavigationDrawerItem(
-                            label = { 
-                                Text(
-                                    text = if (isEnglish) "About the Developers" else "डेवलपर्स के बारे में", 
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Serif,
-                                    fontSize = 14.sp
-                                ) 
-                            },
+                        // About Developers block item
+                        DrawerBubbleItem(
+                            icon = { Icon(Icons.Default.Info, contentDescription = null, tint = SaffronPrimary) },
+                            label = if (isEnglish) "About the Developers" else "डेवलपर्स के बारे में",
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
                                 onAboutDeveloperClick()
-                            },
-                            icon = { Icon(Icons.Default.Info, contentDescription = null, tint = SaffronPrimary) },
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                            colors = NavigationDrawerItemDefaults.colors(
-                                unselectedTextColor = Color.White.copy(alpha = 0.9f)
-                            )
+                            }
                         )
 
-                        // Emergency Contacts item
-                        NavigationDrawerItem(
-                            label = { 
-                                Text(
-                                    text = if (isEnglish) "Emergency Contacts" else "आपातकालीन संपर्क", 
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Serif,
-                                    fontSize = 14.sp
-                                ) 
-                            },
+                        // Emergency Contacts block item
+                        DrawerBubbleItem(
+                            icon = { Icon(Icons.Default.Call, contentDescription = null, tint = SaffronPrimary) },
+                            label = if (isEnglish) "Emergency Contacts" else "आपातकालीन संपर्क",
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
                                 onEmergencyContactsClick()
-                            },
-                            icon = { Icon(Icons.Default.Call, contentDescription = null, tint = SaffronPrimary) },
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                            colors = NavigationDrawerItemDefaults.colors(
-                                unselectedTextColor = Color.White.copy(alpha = 0.9f)
-                            )
+                            }
                         )
 
-                        // Weather item
-                        NavigationDrawerItem(
-                            label = { 
-                                Text(
-                                    text = if (isEnglish) "Live Weather" else "लाइव मौसम", 
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Serif,
-                                    fontSize = 14.sp
-                                ) 
-                            },
+                        // Weather block item
+                        DrawerBubbleItem(
+                            icon = { Icon(Icons.Default.Info, contentDescription = null, tint = SaffronPrimary) },
+                            label = if (isEnglish) "Live Weather" else "लाइव मौसम",
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
                                 onWeatherClick()
-                            },
-                            icon = { Icon(Icons.Default.Info, contentDescription = null, tint = SaffronPrimary) },
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                            colors = NavigationDrawerItemDefaults.colors(
-                                unselectedTextColor = Color.White.copy(alpha = 0.9f)
-                            )
+                            }
                         )
 
-                        // Payments & UPI Guide item
-                        NavigationDrawerItem(
-                            label = { 
-                                Text(
-                                    text = if (isEnglish) "Payments & Currency" else "भुगतान और मुद्रा", 
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Serif,
-                                    fontSize = 14.sp
-                                ) 
-                            },
+                        // Payments & UPI Guide block item
+                        DrawerBubbleItem(
+                            icon = { Icon(Icons.Default.Star, contentDescription = null, tint = SaffronPrimary) },
+                            label = if (isEnglish) "Payments & Currency" else "भुगतान और मुद्रा",
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
                                 onUPIGuideClick()
-                            },
-                            icon = { Icon(Icons.Default.Star, contentDescription = null, tint = SaffronPrimary) },
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                            colors = NavigationDrawerItemDefaults.colors(
-                                unselectedTextColor = Color.White.copy(alpha = 0.9f)
-                            )
+                            }
                         )
-
-
 
                         Spacer(modifier = Modifier.height(16.dp))
                     }
@@ -493,6 +405,46 @@ fun MainScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun DrawerBubbleItem(
+    icon: @Composable () -> Unit,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                if (selected) SaffronPrimary.copy(alpha = 0.15f)
+                else Color.White
+            )
+            .border(
+                width = 1.dp,
+                color = if (selected) SaffronPrimary else Color.Black.copy(alpha = 0.05f),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            icon()
+            Text(
+                text = label,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                fontFamily = FontFamily.Serif,
+                fontSize = 14.sp,
+                color = if (selected) CrimsonSecondary else Color.Black.copy(alpha = 0.8f)
+            )
         }
     }
 }

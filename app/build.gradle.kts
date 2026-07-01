@@ -14,9 +14,11 @@ android {
         applicationId = "com.kushsharma.visitchittorgarh"
         minSdk = 24
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 6
+        versionName = "1.0.5"
     }
+
+
 
 
     val localProperties = Properties()
@@ -29,7 +31,7 @@ android {
 
     signingConfigs {
         create("release") {
-            val kStorePath = localProperties.getProperty("release.keystore")
+            val kStorePath = localProperties.getProperty("release.keystore")  
             val kStorePassword = localProperties.getProperty("release.keystore.password")
             val kAlias = localProperties.getProperty("release.key.alias")
             val kPassword = localProperties.getProperty("release.key.password")

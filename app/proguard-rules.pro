@@ -8,3 +8,16 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any custom rules here.
+
+# JavaMail API Rules
+-keep class javax.mail.** { *; }
+-keep class javax.activation.** { *; }
+-keep class com.sun.mail.** { *; }
+
+# Suppress warnings for missing optional dependencies
+-dontwarn javax.mail.**
+-dontwarn javax.activation.**
+-dontwarn java.awt.**
+-dontwarn java.beans.Beans
+-dontwarn javax.security.**
+

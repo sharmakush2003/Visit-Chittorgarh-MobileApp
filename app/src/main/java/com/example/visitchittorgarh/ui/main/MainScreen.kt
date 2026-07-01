@@ -50,7 +50,7 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     viewModel: MainScreenViewModel = viewModel { MainScreenViewModel(DefaultDataRepository()) },
     onBookingPassClick: (String, String, Double, String, Double, String, Double) -> Unit,
-    onPartnerPortalClick: () -> Unit,
+
     onAboutDeveloperClick: () -> Unit,
     onAboutChittorgarhClick: () -> Unit,
     onHowToReachClick: () -> Unit,
@@ -342,27 +342,7 @@ fun MainScreen(
                         )
 
 
-                        // Partner Portal item
-                        NavigationDrawerItem(
-                            label = { 
-                                Text(
-                                    text = if (isEnglish) "Partner Verification Portal" else "साझेदार सत्यापन पोर्टल", 
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Serif,
-                                    fontSize = 14.sp
-                                ) 
-                            },
-                            selected = false,
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                onPartnerPortalClick()
-                            },
-                            icon = { Icon(Icons.Default.Menu, contentDescription = null, tint = SaffronPrimary) },
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                            colors = NavigationDrawerItemDefaults.colors(
-                                unselectedTextColor = Color.White.copy(alpha = 0.9f)
-                            )
-                        )
+
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }

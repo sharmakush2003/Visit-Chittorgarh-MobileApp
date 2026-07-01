@@ -17,8 +17,6 @@ import kotlinx.serialization.Serializable
     val guidePrice: Double = 0.0
 ) : NavKey
 
-@Serializable data object PartnerPortal : NavKey
-
 @Serializable data object AboutDeveloper : NavKey
 
 @Serializable data object AboutChittorgarh : NavKey

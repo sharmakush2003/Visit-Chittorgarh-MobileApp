@@ -12,7 +12,7 @@ import android.content.Context
 import com.example.visitchittorgarh.ui.main.MainScreen
 import com.example.visitchittorgarh.ui.screens.SplashScreen
 import com.example.visitchittorgarh.ui.screens.BookingPassScreen
-import com.example.visitchittorgarh.ui.screens.PartnerPortalScreen
+
 import com.example.visitchittorgarh.ui.screens.AboutDeveloperScreen
 import com.example.visitchittorgarh.ui.screens.AboutChittorgarhScreen
 import com.example.visitchittorgarh.ui.screens.HowToReachScreen
@@ -78,9 +78,7 @@ fun MainNavigation() {
                 )
               }
             },
-            onPartnerPortalClick = {
-              backStack.add(PartnerPortal)
-            },
+
             onAboutDeveloperClick = {
               backStack.add(AboutDeveloper)
             },
@@ -130,13 +128,7 @@ fun MainNavigation() {
             onBackClick = { backStack.removeLastOrNull() }
           )
         }
-        entry<PartnerPortal> {
-          val isEnglish = sharedPrefs.getBoolean("is_english", true)
-          PartnerPortalScreen(
-            isEnglish = isEnglish,
-            onBackClick = { backStack.removeLastOrNull() }
-          )
-        }
+
         entry<AboutDeveloper> {
           val isEnglish = sharedPrefs.getBoolean("is_english", true)
           AboutDeveloperScreen(

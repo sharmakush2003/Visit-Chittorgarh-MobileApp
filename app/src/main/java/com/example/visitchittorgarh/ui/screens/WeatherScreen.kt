@@ -4,6 +4,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -11,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.example.visitchittorgarh.theme.GoldAccent
 import com.example.visitchittorgarh.theme.SaffronPrimary
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.URL
@@ -37,8 +40,45 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 // ═══════════════════════════════════════════════════════════════════════
-// DATA MODELS
+// DATA MODELS & LOCATIONS
 // ═══════════════════════════════════════════════════════════════════════
+
+data class WeatherLocation(
+    val nameEn: String,
+    val nameHi: String,
+    val lat: Double,
+    val lon: Double,
+    val stateEn: String
+)
+
+val weatherLocations = listOf(
+    WeatherLocation("Chittorgarh", "चित्तौड़गढ़", 24.8887, 74.6269, "Rajasthan"),
+    WeatherLocation("Jaipur", "जयपुर", 26.9124, 75.7873, "Rajasthan"),
+    WeatherLocation("Udaipur", "उदयपुर", 24.5854, 73.7125, "Rajasthan"),
+    WeatherLocation("Jodhpur", "जोधपुर", 26.2389, 73.0243, "Rajasthan"),
+    WeatherLocation("Jaisalmer", "जैसलमेर", 26.9157, 70.9083, "Rajasthan"),
+    WeatherLocation("New Delhi", "नई दिल्ली", 28.6139, 77.2090, "Delhi"),
+    WeatherLocation("Mumbai", "मुंबई", 19.0760, 72.8777, "Maharashtra"),
+    WeatherLocation("Bengaluru", "बेंगलुरु", 12.9716, 77.5946, "Karnataka"),
+    WeatherLocation("Kolkata", "कोलकाता", 22.5726, 88.3639, "West Bengal"),
+    WeatherLocation("Chennai", "चेन्नई", 13.0827, 80.2707, "Tamil Nadu"),
+    WeatherLocation("Hyderabad", "हैदराबाद", 17.3850, 78.4867, "Telangana"),
+    WeatherLocation("Ahmedabad", "अहमदाबाद", 23.0225, 72.5714, "Gujarat"),
+    WeatherLocation("Agra", "आगरा", 27.1767, 78.0081, "Uttar Pradesh"),
+    WeatherLocation("Varanasi", "वाराणसी", 25.3176, 82.9739, "Uttar Pradesh"),
+    WeatherLocation("Srinagar", "श्रीनगर", 34.0837, 74.7973, "Jammu & Kashmir"),
+    WeatherLocation("Shimla", "शिमला", 31.1048, 77.1734, "Himachal Pradesh"),
+    WeatherLocation("Manali", "मनाली", 32.2396, 77.1887, "Himachal Pradesh"),
+    WeatherLocation("Amritsar", "अमृतसर", 31.6340, 74.8723, "Punjab"),
+    WeatherLocation("Goa", "गोवा", 15.4909, 73.8278, "Goa"),
+    WeatherLocation("Kochi", "कोच्चि", 9.9312, 76.2673, "Kerala"),
+    WeatherLocation("Darjeeling", "दार्जिलिंग", 27.0410, 88.2627, "West Bengal"),
+    WeatherLocation("Ooty", "ऊटी", 11.4102, 76.6950, "Tamil Nadu"),
+    WeatherLocation("Pune", "पुणे", 18.5204, 73.8567, "Maharashtra"),
+    WeatherLocation("Bhopal", "भोपाल", 23.2599, 77.4126, "Madhya Pradesh"),
+    WeatherLocation("Patna", "पटना", 25.5941, 85.1376, "Bihar"),
+    WeatherLocation("Rishikesh", "ऋषिकेश", 30.0869, 78.2676, "Uttarakhand")
+)
 
 data class WeatherData(
     val currentTemp: Double,
@@ -151,7 +191,6 @@ fun wmoToDescHi(code: Int): String = when (code) {
     else         -> "अज्ञात"
 }
 
-// Dynamic sky gradient based on time and weather - elegant dark-royal themes
 fun skyGradient(code: Int, hourOfDay: Int): List<Color> {
     val isNight = hourOfDay < 6 || hourOfDay >= 19
     val isDusk = hourOfDay in 17..18
@@ -188,14 +227,12 @@ fun windDirLabel(deg: Int): String {
     return dirs[((deg + 22.5) / 45).toInt() % 8]
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// OPEN-METEO API FETCH  (free, no key, ECMWF powered)
-// ═══════════════════════════════════════════════════════════════════════
+// ─── Network Fetch: Live Weather ─────────────────────────────────────────────
 
-suspend fun fetchOpenMeteoWeather(): WeatherData? = withContext(Dispatchers.IO) {
+suspend fun fetchOpenMeteoWeather(lat: Double, lon: Double): WeatherData? = withContext(Dispatchers.IO) {
     try {
         val url = "https://api.open-meteo.com/v1/forecast?" +
-            "latitude=24.8887&longitude=74.6269" +
+            "latitude=$lat&longitude=$lon" +
             "&current=temperature_2m,relative_humidity_2m,apparent_temperature," +
             "precipitation,weather_code,cloud_cover,wind_speed_10m," +
             "wind_direction_10m,uv_index,visibility,surface_pressure" +
@@ -210,7 +247,7 @@ suspend fun fetchOpenMeteoWeather(): WeatherData? = withContext(Dispatchers.IO) 
         val cur = json.getJSONObject("current")
         val currentCode = cur.getInt("weather_code")
 
-        // Parse hourly (next 24 hours from now)
+        // Parse hourly
         val hourlyJson = json.getJSONObject("hourly")
         val hourlyTimes = hourlyJson.getJSONArray("time")
         val hourlyTemps = hourlyJson.getJSONArray("temperature_2m")
@@ -289,7 +326,7 @@ suspend fun fetchOpenMeteoWeather(): WeatherData? = withContext(Dispatchers.IO) 
             )
         }
 
-        // Sunrise/Sunset for today (display format)
+        // Sunrise/Sunset for today
         val todaySrRaw = dailySunrise.getString(0)
         val todaySsRaw = dailySunset.getString(0)
         val displayTimeFmt = SimpleDateFormat("h:mm a", Locale.US)
@@ -302,8 +339,8 @@ suspend fun fetchOpenMeteoWeather(): WeatherData? = withContext(Dispatchers.IO) 
             currentTemp = cur.getDouble("temperature_2m"),
             feelsLike = cur.getDouble("apparent_temperature"),
             humidity = cur.getInt("relative_humidity_2m"),
-            windSpeed = cur.getDouble("wind_speed_10m"),
-            windDirection = cur.getInt("wind_direction_10m"),
+            windSpeed = cur.optDouble("wind_speed_10m", 0.0),
+            windDirection = cur.optInt("wind_direction_10m", 0),
             uvIndex = cur.optDouble("uv_index", 0.0),
             visibility = cur.optDouble("visibility", 10000.0) / 1000.0,
             pressure = cur.getDouble("surface_pressure"),
@@ -321,6 +358,43 @@ suspend fun fetchOpenMeteoWeather(): WeatherData? = withContext(Dispatchers.IO) 
     }
 }
 
+// ─── Network Fetch: Online Geocoding Search ──────────────────────────────────
+
+suspend fun searchCitiesOnline(query: String): List<WeatherLocation> = withContext(Dispatchers.IO) {
+    try {
+        val encodedQuery = java.net.URLEncoder.encode(query, "UTF-8")
+        val urlStr = "https://geocoding-api.open-meteo.com/v1/search?name=$encodedQuery&count=25&language=en&format=json"
+        val raw = URL(urlStr).readText(Charsets.UTF_8)
+        val json = JSONObject(raw)
+        if (!json.has("results")) return@withContext emptyList<WeatherLocation>()
+
+        val results = json.getJSONArray("results")
+        val list = mutableListOf<WeatherLocation>()
+        for (i in 0 until results.length()) {
+            val item = results.getJSONObject(i)
+            val countryCode = item.optString("country_code", "")
+            if (countryCode.equals("IN", ignoreCase = true)) {
+                val name = item.getString("name")
+                val lat = item.getDouble("latitude")
+                val lon = item.getDouble("longitude")
+                val state = item.optString("admin1", "India")
+                list.add(
+                    WeatherLocation(
+                        nameEn = name,
+                        nameHi = name,
+                        lat = lat,
+                        lon = lon,
+                        stateEn = state
+                    )
+                )
+            }
+        }
+        list
+    } catch (e: Exception) {
+        emptyList()
+    }
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // MAIN WEATHER SCREEN
 // ═══════════════════════════════════════════════════════════════════════
@@ -331,6 +405,13 @@ fun WeatherScreen(
     isEnglish: Boolean,
     onBackClick: () -> Unit
 ) {
+    var selectedLocation by remember { mutableStateOf(weatherLocations[0]) }
+    var showSearchDialog by remember { mutableStateOf(false) }
+
+    var searchQuery by remember { mutableStateOf("") }
+    var filteredLocations by remember { mutableStateOf(weatherLocations) }
+    var isSearchingOnline by remember { mutableStateOf(false) }
+
     var weather by remember { mutableStateOf<WeatherData?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var hasError by remember { mutableStateOf(false) }
@@ -338,12 +419,36 @@ fun WeatherScreen(
 
     val hourOfDay = remember { Calendar.getInstance().get(Calendar.HOUR_OF_DAY) }
 
-    LaunchedEffect(refreshTrigger) {
+    LaunchedEffect(selectedLocation, refreshTrigger) {
         isLoading = true; hasError = false
-        val result = fetchOpenMeteoWeather()
+        val result = fetchOpenMeteoWeather(selectedLocation.lat, selectedLocation.lon)
         weather = result
         hasError = result == null
         isLoading = false
+    }
+
+    // Reset states when search dialog status is modified
+    LaunchedEffect(showSearchDialog) {
+        if (!showSearchDialog) {
+            searchQuery = ""
+            filteredLocations = weatherLocations
+            isSearchingOnline = false
+        }
+    }
+
+    // Debounced Search triggers Geocoding API lookups
+    LaunchedEffect(searchQuery) {
+        val query = searchQuery.trim()
+        if (query.length >= 3) {
+            isSearchingOnline = true
+            delay(500) // Debounce delay to prevent network spamming
+            val results = searchCitiesOnline(query)
+            filteredLocations = results
+            isSearchingOnline = false
+        } else {
+            filteredLocations = weatherLocations
+            isSearchingOnline = false
+        }
     }
 
     val gradient = remember(weather) {
@@ -367,14 +472,14 @@ fun WeatherScreen(
             .fillMaxSize()
             .background(Brush.verticalGradient(gradient))
     ) {
-        // Content list is rendered first, so it is in the background
+        // Content list
         when {
             isLoading -> LoadingState(loadPulse, isEnglish)
             hasError  -> ErrorState(isEnglish) { refreshTrigger++ }
             weather != null -> WeatherContent(weather!!, isEnglish, hourOfDay)
         }
 
-        // Top bar is rendered last, so it stays on top of the hierarchy and intercepts touches properly
+        // Top bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -386,15 +491,33 @@ fun WeatherScreen(
                 Icon(Icons.Default.ArrowBack, null, tint = Color.White)
             }
             Spacer(modifier = Modifier.width(6.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    "📍 Chittorgarh, Rajasthan",
-                    color = Color.White, fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp, fontFamily = FontFamily.Serif
-                )
-                weather?.fetchTime?.let {
-                    Text("Updated $it", color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { showSearchDialog = true }
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "📍 ${if (isEnglish) selectedLocation.nameEn else selectedLocation.nameHi}",
+                        color = Color.White, fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp, fontFamily = FontFamily.Serif
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Select City",
+                        tint = Color.White.copy(alpha = 0.8f),
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
+                Text(
+                    text = if (isEnglish) "Tap to change city" else "शहर बदलने के लिए टैप करें",
+                    color = SaffronPrimary,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
             IconButton(onClick = { refreshTrigger++ }) {
                 Icon(
@@ -404,11 +527,128 @@ fun WeatherScreen(
                 )
             }
         }
+
+        // Real-time City Search/Select Dialog
+        if (showSearchDialog) {
+            AlertDialog(
+                onDismissRequest = { showSearchDialog = false },
+                title = {
+                    Text(
+                        text = if (isEnglish) "Select City in India" else "भारत में शहर चुनें",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif
+                    )
+                },
+                text = {
+                    Column {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = {
+                                Text(
+                                    if (isEnglish) "Search city (e.g. Udaipur, Churu)..." else "शहर खोजें (जैसे Udaipur, Churu)...",
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                )
+                            },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = SaffronPrimary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                focusedLabelColor = SaffronPrimary
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        if (isSearchingOnline) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(120.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    color = SaffronPrimary,
+                                    modifier = Modifier.size(36.dp)
+                                )
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .height(260.dp)
+                                    .fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                items(filteredLocations.size) { index ->
+                                    val loc = filteredLocations[index]
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .clickable {
+                                                selectedLocation = loc
+                                                showSearchDialog = false
+                                                refreshTrigger++
+                                            }
+                                            .padding(vertical = 12.dp, horizontal = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text("📍", fontSize = 16.sp)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Column {
+                                            Text(
+                                                text = if (isEnglish) loc.nameEn else loc.nameHi,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = loc.stateEn,
+                                                fontSize = 11.sp,
+                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                            )
+                                        }
+                                    }
+                                }
+                                if (filteredLocations.isEmpty()) {
+                                    item {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 32.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = if (isEnglish) "No cities found" else "कोई शहर नहीं मिला",
+                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                                fontSize = 14.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {},
+                dismissButton = {
+                    TextButton(onClick = { showSearchDialog = false }) {
+                        Text(
+                            text = if (isEnglish) "Close" else "बंद करें",
+                            color = SaffronPrimary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(20.dp)
+            )
+        }
     }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// LOADING / ERROR
+// LOADING / ERROR STATES
 // ═══════════════════════════════════════════════════════════════════════
 
 @Composable
@@ -673,9 +913,7 @@ private fun WeatherContent(w: WeatherData, isEnglish: Boolean, hourOfDay: Int) {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// COMPONENT: Hourly Card
-// ═══════════════════════════════════════════════════════════════════════
+// ─── Sub-Composables ─────────────────────────────────────────────────────────
 
 @Composable
 private fun HourlyCard(item: HourlyItem) {
@@ -695,17 +933,12 @@ private fun HourlyCard(item: HourlyItem) {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// COMPONENT: Daily Row
-// ═══════════════════════════════════════════════════════════════════════
-
 @Composable
 private fun DailyRow(day: DailyItem, isEnglish: Boolean, globalMin: Double, globalMax: Double) {
     Row(
         Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Narrower day label with responsive text size
         Text(
             text = day.dayLabel,
             color = Color.White,
@@ -713,8 +946,7 @@ private fun DailyRow(day: DailyItem, isEnglish: Boolean, globalMin: Double, glob
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.width(75.dp)
         )
-        
-        // Stack weather icon and precipitation to eliminate the horizontal gap column entirely
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.width(42.dp)
@@ -729,10 +961,9 @@ private fun DailyRow(day: DailyItem, isEnglish: Boolean, globalMin: Double, glob
                 )
             }
         }
-        
+
         Spacer(Modifier.width(8.dp))
-        
-        // Minimum temperature
+
         Text(
             text = "${day.minTemp.toInt()}°",
             color = Color.White.copy(alpha = 0.55f),
@@ -740,10 +971,9 @@ private fun DailyRow(day: DailyItem, isEnglish: Boolean, globalMin: Double, glob
             modifier = Modifier.width(26.dp),
             textAlign = TextAlign.End
         )
-        
+
         Spacer(Modifier.width(6.dp))
-        
-        // Temperature bar scales dynamically to fill all available width
+
         val range = (globalMax - globalMin).let { if (it == 0.0) 1.0 else it }
         val barStart = ((day.minTemp - globalMin) / range).toFloat()
         val barEnd   = ((day.maxTemp - globalMin) / range).toFloat()
@@ -763,10 +993,9 @@ private fun DailyRow(day: DailyItem, isEnglish: Boolean, globalMin: Double, glob
                 StrokeCap.Round
             )
         }
-        
+
         Spacer(Modifier.width(6.dp))
-        
-        // Maximum temperature
+
         Text(
             text = "${day.maxTemp.toInt()}°",
             color = Color.White,
@@ -776,10 +1005,6 @@ private fun DailyRow(day: DailyItem, isEnglish: Boolean, globalMin: Double, glob
         )
     }
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-// COMPONENT: Stat Cards
-// ═══════════════════════════════════════════════════════════════════════
 
 @Composable
 private fun StatCard(emoji: String, title: String, value: String, sub: String, modifier: Modifier = Modifier) {
@@ -810,7 +1035,6 @@ private fun UVStatCard(uv: Double, isEnglish: Boolean, modifier: Modifier = Modi
             Spacer(Modifier.height(8.dp))
             Text("${uv.toInt()}", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Thin)
             Spacer(Modifier.height(4.dp))
-            // UV bar
             Box(
                 Modifier.fillMaxWidth().height(6.dp)
                     .clip(RoundedCornerShape(3.dp))
@@ -821,10 +1045,6 @@ private fun UVStatCard(uv: Double, isEnglish: Boolean, modifier: Modifier = Modi
         }
     }
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-// COMPONENT: Sun Arc
-// ═══════════════════════════════════════════════════════════════════════
 
 @Composable
 private fun SunArcView(sunrise: String, sunset: String, hourOfDay: Int) {
@@ -839,15 +1059,12 @@ private fun SunArcView(sunrise: String, sunset: String, hourOfDay: Int) {
         val cx = w / 2f; val cy = h + 10.dp.toPx()
         val rx = (w / 2f) - padding; val ry = h - 16.dp.toPx()
 
-        // Arc path
-        val arcColor = Color.White.copy(alpha = 0.25f)
         drawArc(
-            color = arcColor, startAngle = 180f, sweepAngle = 180f, useCenter = false,
+            color = Color.White.copy(alpha = 0.25f), startAngle = 180f, sweepAngle = 180f, useCenter = false,
             topLeft = Offset(cx - rx, cy - ry), size = Size(rx * 2, ry * 2),
             style = Stroke(width = 2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f)))
         )
 
-        // Gradient arc (dawn to dusk)
         val sweep = 180f * progress
         drawArc(
             brush = Brush.linearGradient(listOf(Color(0xFFF5C843), Color(0xFFE8824A), Color(0xFF9C27B0))),
@@ -856,23 +1073,16 @@ private fun SunArcView(sunrise: String, sunset: String, hourOfDay: Int) {
             style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
         )
 
-        // Sun dot position
         val rad = Math.toRadians((180.0 + 180.0 * progress)).toFloat()
         val sunX = cx + rx * kotlin.math.cos(rad)
         val sunY = cy + ry * kotlin.math.sin(rad)
 
-        // Glow
         drawCircle(SaffronPrimary.copy(alpha = 0.3f), radius = 16.dp.toPx(), center = Offset(sunX, sunY))
         drawCircle(SaffronPrimary, radius = 8.dp.toPx(), center = Offset(sunX, sunY))
 
-        // Horizon line
         drawLine(Color.White.copy(alpha = 0.15f), Offset(padding, cy), Offset(w - padding, cy), 1.dp.toPx())
     }
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-// COMPONENT: Wind Compass
-// ═══════════════════════════════════════════════════════════════════════
 
 @Composable
 private fun WindCompassView(degrees: Float, modifier: Modifier = Modifier) {
@@ -881,10 +1091,8 @@ private fun WindCompassView(degrees: Float, modifier: Modifier = Modifier) {
         val cx = size.width / 2; val cy = size.height / 2
         val r = minOf(cx, cy) - 4.dp.toPx()
 
-        // Outer circle
         drawCircle(Color.White.copy(alpha = 0.15f), radius = r, center = Offset(cx, cy), style = Stroke(1.dp.toPx()))
 
-        // Cardinal labels drawn manually:
         val labels = listOf("N" to 0f, "E" to 90f, "S" to 180f, "W" to 270f)
         labels.forEach { (_, angle) ->
             val rad = Math.toRadians(angle.toDouble() - 90)
@@ -893,7 +1101,6 @@ private fun WindCompassView(degrees: Float, modifier: Modifier = Modifier) {
             drawCircle(Color.White.copy(alpha = 0.4f), 2.dp.toPx(), Offset(tx, ty))
         }
 
-        // Arrow pointing TO wind direction
         val arrowRad = Math.toRadians(rotation.toDouble() - 90)
         val tipX = cx + r * 0.6f * kotlin.math.cos(arrowRad).toFloat()
         val tipY = cy + r * 0.6f * kotlin.math.sin(arrowRad).toFloat()
@@ -909,10 +1116,6 @@ private fun WindCompassView(degrees: Float, modifier: Modifier = Modifier) {
         drawCircle(Color.White.copy(alpha = 0.5f), 3.dp.toPx(), Offset(tailX, tailY))
     }
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-// COMPONENT: Tourist Advisory
-// ═══════════════════════════════════════════════════════════════════════
 
 @Composable
 private fun TouristAdvisoryCard(w: WeatherData, isEnglish: Boolean) {
@@ -941,10 +1144,6 @@ private fun TouristAdvisoryCard(w: WeatherData, isEnglish: Boolean) {
         }
     }
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-// SHARED: Glass Card
-// ═══════════════════════════════════════════════════════════════════════
 
 @Composable
 private fun GlassCard(

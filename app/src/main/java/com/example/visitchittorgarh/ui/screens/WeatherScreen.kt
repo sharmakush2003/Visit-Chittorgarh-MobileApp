@@ -667,13 +667,13 @@ private fun ErrorState(isEnglish: Boolean, onRetry: () -> Unit) {
 private fun WeatherContent(w: WeatherData, isEnglish: Boolean, hourOfDay: Int) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(top = 84.dp, bottom = 48.dp) // Added slightly more top padding so content scrolls completely below top bar
+        contentPadding = PaddingValues(top = 108.dp, bottom = 48.dp) // Space out content from top bar
     ) {
 
         // ── HERO: Big temperature ──────────────────────────────────────────
         item {
             Column(
-                Modifier.fillMaxWidth().padding(top = 16.dp),
+                Modifier.fillMaxWidth().padding(top = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(wmoToEmoji(w.weatherCode), fontSize = 88.sp)

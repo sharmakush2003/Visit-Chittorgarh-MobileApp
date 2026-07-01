@@ -39,6 +39,7 @@ import com.example.visitchittorgarh.theme.CrimsonDark
 import com.example.visitchittorgarh.theme.CrimsonSecondary
 import com.example.visitchittorgarh.theme.GoldAccent
 import com.example.visitchittorgarh.theme.SaffronPrimary
+import com.example.visitchittorgarh.theme.SlateBackgroundLight
 import com.example.visitchittorgarh.ui.screens.*
 import kotlinx.coroutines.launch
 
@@ -353,20 +354,29 @@ fun MainScreen(
             modifier = modifier,
             topBar = {
                 Surface(
-                    tonalElevation = 4.dp,
-                    shadowElevation = 4.dp,
-                    color = MaterialTheme.colorScheme.surface
+                    tonalElevation = 6.dp,
+                    shadowElevation = 6.dp,
+                    color = SlateBackgroundLight
                 ) {
                     TopAppBar(
                         title = {
-                            Text(
-                                text = if (isEnglish) "ROYAL CHITTORGARH" else "शाही चित्तौड़गढ़",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                                fontFamily = FontFamily.Serif,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                letterSpacing = 1.sp
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "🏰",
+                                    fontSize = 20.sp
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = if (isEnglish) "ROYAL CHITTORGARH" else "शाही चित्तौड़गढ़",
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 17.sp,
+                                    fontFamily = FontFamily.Serif,
+                                    color = CrimsonSecondary,
+                                    letterSpacing = 0.5.sp
+                                )
+                            }
                         },
                         navigationIcon = {
                             IconButton(onClick = { scope.launch { drawerState.open() } }) {
@@ -374,19 +384,34 @@ fun MainScreen(
                             }
                         },
                         actions = {
-                            TextButton(
-                                onClick = {
-                                    isEnglish = !isEnglish
-                                    sharedPrefs.edit().putBoolean("is_english", isEnglish).apply()
-                                }
+                            Box(
+                                modifier = Modifier
+                                    .padding(end = 12.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(SaffronPrimary.copy(alpha = 0.12f))
+                                    .border(1.dp, SaffronPrimary.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                                    .clickable {
+                                        isEnglish = !isEnglish
+                                        sharedPrefs.edit().putBoolean("is_english", isEnglish).apply()
+                                    }
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
                             ) {
-                                Text(
-                                    text = if (isEnglish) "English" else "हिंदी",
-                                    fontWeight = FontWeight.Bold,
-                                    color = SaffronPrimary,
-                                    fontFamily = FontFamily.Serif,
-                                    fontSize = 14.sp
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text(
+                                        text = "🌐",
+                                        fontSize = 12.sp
+                                    )
+                                    Text(
+                                        text = if (isEnglish) "English" else "हिंदी",
+                                        fontWeight = FontWeight.Bold,
+                                        color = CrimsonSecondary,
+                                        fontFamily = FontFamily.Serif,
+                                        fontSize = 11.sp
+                                    )
+                                }
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(

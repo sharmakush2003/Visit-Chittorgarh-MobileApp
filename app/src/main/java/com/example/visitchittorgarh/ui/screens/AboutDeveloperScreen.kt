@@ -216,7 +216,7 @@ fun AboutDeveloperScreen(
                             }
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "DPIIT Recognized\nBhaskar ID:\nIN-0426-9449SG",
+                                text = "Registered Startup\nBhaskar ID:\nIN-0426-9449SG",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color.Black.copy(alpha = 0.6f),
